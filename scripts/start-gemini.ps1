@@ -1,5 +1,7 @@
 # Servidor local de tokens efemeros, nao acessivel de outros dispositivos.
 $ErrorActionPreference='Stop'
+# Windows PowerShell 5.1: ProtectedData está no assembly System.Security.
+Add-Type -AssemblyName System.Security
 $existing=Get-NetTCPConnection -LocalPort 4174 -State Listen -ErrorAction SilentlyContinue
 if($existing){Write-Host 'Ponte Gemini ja iniciada.';exit 0}
 $folder=Join-Path $env:LOCALAPPDATA 'HorizontePlay'

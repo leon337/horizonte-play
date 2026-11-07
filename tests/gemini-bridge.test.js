@@ -16,6 +16,8 @@ async function withServer(handler, action) {
 test('modelo e formato de chave reconhecidos sem expor segredo', () => {
   assert.equal(GEMINI_MODEL,'gemini-3.8-live');
   assert.equal(validGeminiKey('AIza'+'A'.repeat(35)),true);
+  assert.equal(validGeminiKey('AQ.'+'A'.repeat(50)),true);
+  assert.equal(validGeminiKey('AQ.'+'A'.repeat(10)),false);
   assert.equal(validGeminiKey('uma chave errada'),false);
 });
 test('saúde local não devolve a chave, somente estado', async () => {
@@ -48,7 +50,7 @@ test('sem chave, não acessa serviço nem emite token', async () => {
     assert.equal((await resp.json()).code,'NOT_CONFIGURED');
   });
 });
-test('backend troca chave por token efêmero com modelo limitado', async () => {
+test('backend troca chave por token efêmero com validade limitada', async () => {
   const key='AIza'+'X'.repeat(35);
   let upstream;
   const fetcher=async (url,options)=>{
@@ -67,5 +69,9 @@ test('backend troca chave por token efêmero com modelo limitado', async () => {
     assert.ok(!JSON.stringify(body).includes(key));
   });
   assert.equal(upstream.options.headers['x-goog-api-key'],key);
-  assert.equal(JSON.parse(upstream.options.body).liveConnectConstraints.model,'models/gemini-3.8-live');
+  const payload=JSON.parse(upstream.options.body);
+  assert.equal(payload.uses,1);
+  assert.ok(payload.expireTime);
+  assert.ok(payload.newSessionExpireTime);
+  assert.equal(payload.liveConnectConstraints,undefined);
 });

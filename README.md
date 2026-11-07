@@ -134,3 +134,16 @@ Para desenvolvimento da ponte separadamente:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-gemini.ps1
 ```
 `GET http://127.0.0.1:4174/health` mostra apenas o estado configurado.
+
+### Chaves novas do Google AI Studio
+
+O configurador reconhece tanto as chaves legadas `AIza...` quanto as chaves
+de autenticação modernas `AQ....` (formato lançado pelo Google em 2026).
+A chave fica criptografada usando DPAPI no perfil atual do Windows.
+O endpoint de provisionamento deste projeto rejeitou o campo
+`liveConnectConstraints`; por isso, o token temporário é emitido sem essa
+restrição adicional, mas com uso único, início de sessão em até 1 minuto e
+expiração em 10 minutos. Este backend é exclusivo para uso local.
+
+**Atenção:** não publique capturas de tela que mostrem chaves API. Caso a
+chave apareça em imagem compartilhada, gere uma nova no AI Studio e reconfigure.

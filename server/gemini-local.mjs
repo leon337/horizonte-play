@@ -7,7 +7,7 @@ export const LOCAL_PORT = 4174;
 const ORIGINS = new Set(['http://127.0.0.1:5173','http://localhost:5173',
  'http://127.0.0.1:5174','http://localhost:5174']);
 export const validGeminiKey = key =>
- typeof key === 'string' && /^AIza[A-Za-z0-9_-]{20,}$/.test(key.trim());
+ typeof key === 'string' && /^(?:AIza[A-Za-z0-9_-]{20,}|AQ\.[A-Za-z0-9_-]{20,})$/.test(key.trim());
 
 function reply(res, code, obj, origin = null) {
  res.writeHead(code, {
@@ -53,8 +53,9 @@ export function createHandler({ key=process.env.GEMINI_API_KEY||'', fetcher=fetc
        body:JSON.stringify({
          uses:1,
          expireTime:new Date(timestamp+10*60000).toISOString(),
-         newSessionExpireTime:new Date(timestamp+60000).toISOString(),
-         liveConnectConstraints:{model:'models/'+GEMINI_MODEL}
+         newSessionExpireTime:new Date(timestamp+60000).toISOString()
+         // A API de provisionamento do projeto rejeitou liveConnectConstraints
+         // com INVALID_ARGUMENT. O token permanece efêmero e de uso único.
        }),
        signal:AbortSignal.timeout(15000)
      });
