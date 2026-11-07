@@ -29,10 +29,36 @@ test('atendente interpreta pedidos em português e diferencia preço de compra',
     { intent: 'order', sku: 'cafe', quantity: 2 });
   assert.deepEqual(localInterpret('me vê 3 pães de queijo'),
     { intent: 'order', sku: 'pao_queijo', quantity: 3 });
-  assert.deepEqual(localInterpret('Quanto custa um suco?'), { intent: 'list' });
+  assert.deepEqual(localInterpret('Quanto custa um suco?'), { intent: 'list', sku: 'suco' });
   assert.deepEqual(localInterpret('Quero 99 sucos'),
     { intent: 'order', sku: 'suco', quantity: 99 });
   assert.deepEqual(localInterpret('Quero café e suco'), { intent: 'help' });
+});
+
+test('consulta de preço responde produto específico sem abrir compra', async () => {
+  await withCommerce(async (base, store) => {
+    const shop = store.createCafe({ x: 12, z: 5, name: 'Preços' });
+    const result = await (await post(base,
+      '/api/shops/' + shop.id + '/attendant/chat',
+      { message: 'Quanto custa um suco?' })).json();
+    assert.equal(result.proposal, null);
+    assert.match(result.message, /suco de frutas custa 10 moedas virtuais/i);
+    assert.doesNotMatch(result.message, /pão de queijo/i);
+    assert.equal(store.cash(shop.id).orders, 0);
+  });
+});
+
+test('pergunta simples não vira pedido quando Gemini erra interpretação', async () => {
+  await withCommerce(async (base, store) => {
+    const shop = store.createCafe({ x: 12, z: 5, name: 'Segurança' });
+    const result = await (await post(base,
+      '/api/shops/' + shop.id + '/attendant/chat',
+      { message: 'Quanto custa o café?', useGemini: true })).json();
+    assert.equal(result.mode, 'local-fallback');
+    assert.equal(result.proposal, null);
+    assert.equal(store.cash(shop.id).orders, 0);
+    assert.equal(store.snapshot().wallet, 180);
+  }, async () => ({intent:'order',sku:'cafe',quantity:20}));
 });
 
 test('MCP: simular pedido não altera carteira; confirmar altera exatamente uma vez', async () => {

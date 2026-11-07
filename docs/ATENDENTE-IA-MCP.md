@@ -65,3 +65,15 @@ fallback do modelo e redaction da chave no endpoint local.
 - Propostas ficam em RAM: reiniciar Commerce invalida orçamentos não confirmados.
 - Não há autenticação multiusuário nem proteção de acesso público.
 - Validação com modelo Gemini real depende de aceite consciente de custos e da disponibilidade da chave/modelo; o fluxo foi testado com simulação controlada.
+
+## Evolução 4.6 — experiência do balcão
+
+- Duas abas no painel: **Conversar com Alex** (padrão) e **Compra rápida**, com navegação por clique e setas.
+- Histórico do atendente ampliado, limitado a 28 mensagens e inserido como texto seguro (sem HTML vindo da IA).
+- Perguntas específicas sobre preço e disponibilidade recebem resposta só do produto solicitado.
+- Uma pergunta não pode virar proposta de compra por sugestão do Gemini; o interpretador local funciona como guarda.
+- Após compra pelo formulário clássico, a interface invalida qualquer proposta pendente do atendente.
+- Teste visual com Chrome/Playwright em desktop (1440×900) e viewport móvel (390×844) aprovado, usando apenas espelhamento de estado em memória no navegador de teste; o estoque real não foi alterado.
+- A navegação física do personagem foi parcialmente exercitada. No Chrome headless com renderização software, o cenário rodou a 1–2 FPS; isso é limitação da automação usada e não comprova desempenho ruim na GPU real.
+
+O navegador local permanece a forma recomendada para confirmar animação e FPS real.

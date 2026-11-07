@@ -1,4 +1,4 @@
-# Horizonte Play 4.5 — Atendente Alex + Horizonte Commerce MCP
+# Horizonte Play 4.6 — Atendimento inteligente e compra rápida
 
 **Um jogo sandbox 3D original, explorável no navegador**, construído com [Three.js](https://threejs.org/) e [Vite](https://vite.dev/).
 
@@ -83,13 +83,16 @@ Veja também a [especificação do MVP da Nina](docs/NPC-MVP.md).
 
 ## Estado do projeto
 
-Versão experimental **4.5**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
+Versão experimental **4.6**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
 
 **Observação:** o repositório contém apenas o código-fonte, os testes e uma imagem de apresentação. Backups, dependências, builds locais e capturas de teste ficam fora do Git.
 
-## Alex — atendente inteligente, MCP e Gemini opcional (v4.5)
+## Alex — atendente inteligente, MCP e Gemini opcional (v4.6)
 
 Aproxime-se de uma cafeteria e pressione **G** para conversar com Alex.
+O balcão abre na aba **Conversar com Alex**; use **Compra rápida** para o formulário
+clássico, mantendo estoque, caixa e demonstração da Nina. As abas aceitam clique e
+setas do teclado. A interface foi revisada para desktop e celular.
 Peça, por exemplo, **"Quero dois cafés"**. O atendimento consulta produtos pelo MCP
 central, apresenta um orçamento e **só registra a compra após clicar em confirmar**.
 A opção Gemini para interpretação de texto fica desligada por padrão e **pode gerar custos**.

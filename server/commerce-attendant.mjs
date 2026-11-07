@@ -21,7 +21,7 @@ export function localInterpret(message) {
   const match = line.match(/\b(\d{1,3}|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez)\b/);
   const quantity = match ? (WORD_NUMBERS[match[1]] ?? Number(match[1])) : 1;
   if (matches.length > 1) return { intent: 'help' };
-  if (wantsPrice && !wantsOrder) return { intent: 'list' };
+  if (wantsPrice && !wantsOrder) return { intent: 'list', sku };
   if (wantsOrder && sku) return { intent: 'order', sku, quantity };
   return { intent: 'list' };
 }
@@ -61,18 +61,24 @@ export function createAttendantService(callTool, { interpreter = null, now = Dat
     if (useGemini === true && interpreter) {
       try {
         const suggestion = approvedInterpret(await interpreter(message));
-        const conflict = localIntent.intent === 'order' && (
-          suggestion?.intent !== 'order' || suggestion.sku !== localIntent.sku ||
-          suggestion.quantity !== localIntent.quantity);
+        const conflict = (localIntent.intent !== 'order' && suggestion?.intent === 'order') ||
+          (localIntent.intent === 'order' && (
+            suggestion?.intent !== 'order' || suggestion.sku !== localIntent.sku ||
+            suggestion.quantity !== localIntent.quantity));
         if (suggestion && !conflict) { intent = suggestion; mode = 'gemini'; }
         else mode = 'local-fallback';
       } catch { mode = 'local-fallback'; }
     }
-    if (intent.intent !== 'order') return {
-      message: 'Olá! Nosso cardápio: ' + describe(inventory.products) +
-        ' Diga, por exemplo: quero dois cafés.',
-      mode, proposal: null
-    };
+    if (intent.intent !== 'order') {
+      const selected = inventory.products.find(product => product.sku === localIntent.sku);
+      const message = selected
+        ? selected.label + ' custa ' + selected.price + ' moedas virtuais e temos ' +
+          selected.stock + ' unidade(s) disponíveis. Para pedir, diga: quero um ' +
+          selected.label.toLowerCase() + '.'
+        : 'Olá! Nosso cardápio: ' + describe(inventory.products) +
+          ' Diga, por exemplo: quero dois cafés.';
+      return { message, mode, proposal: null };
+    }
     if (!Number.isInteger(intent.quantity) || intent.quantity < 1 || intent.quantity > 20)
       return { message: 'A quantidade deve ser entre 1 e 20.', mode, proposal: null };
     const item = inventory.products.find(product => product.sku === intent.sku);

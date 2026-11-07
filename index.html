@@ -139,6 +139,13 @@
     </div>
     <div class="commerce-modal-body">
       <div class="commerce-fake-money">🪙 Economia simulada · nenhuma compra com dinheiro real</div>
+      <div class="commerce-tabs" role="tablist" aria-label="Modo de atendimento">
+        <button id="commerce-tab-chat" type="button" role="tab" aria-controls="commerce-panel-chat"
+          aria-selected="true" tabindex="0">💬 Conversar com Alex</button>
+        <button id="commerce-tab-quick" type="button" role="tab" aria-controls="commerce-panel-quick"
+          aria-selected="false" tabindex="-1">🛒 Compra rápida</button>
+      </div>
+      <div id="commerce-panel-quick" role="tabpanel" aria-labelledby="commerce-tab-quick" hidden>
       <label for="commerce-product">Produto e estoque</label>
       <select id="commerce-product"></select>
       <label for="commerce-quantity">Quantidade (1 a 20)</label>
@@ -149,7 +156,9 @@
         <button id="commerce-restock" type="button">📦 Repor estoque</button>
       </div>
       <p id="commerce-feedback" role="status">Selecione um produto.</p>
-      <section class="commerce-attendant" aria-label="Conversa com atendente inteligente">
+      </div>
+      <section id="commerce-panel-chat" class="commerce-attendant" role="tabpanel"
+        aria-labelledby="commerce-tab-chat" aria-label="Conversa com atendente inteligente">
         <h3>💬 Alex · Atendente inteligente</h3>
         <small id="commerce-attendant-mode" role="status">Atendimento local · sem custo de IA</small>
         <div id="commerce-attendant-history" class="commerce-attendant-history"
@@ -176,7 +185,7 @@
     <button id="reset-btn" type="button" hidden>↺ Renascer <kbd>R</kbd></button>
   </div>
   <div id="toast" role="status" class="toast" hidden></div>
-  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> COMMERCE 4.5</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
+  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> COMMERCE 4.6</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
   <div id="error" hidden role="alert">Este navegador não conseguiu iniciar o mundo 3D. Verifique o WebGL e a aceleração gráfica.</div>
 </div>
 <script type="module" src="/src/main.js"></script>

@@ -140,8 +140,9 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
     text('commerce-feedback', 'Bem-vindo! Escolha um produto ou veja o caixa.');
     renderProducts(activeShop);
     resetAttendant();
+    setCommerceTab('chat');
     render();
-    $('commerce-product').focus();
+    $('commerce-attendant-input').focus();
     return true;
   }
   function close() {
@@ -171,6 +172,8 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
         '/' + route, { data });
       await synchronize();
       if (activeShop) renderProducts(activeShop);
+      pendingQuote = null;
+      $('commerce-attendant-confirm').hidden = true;
       const message = kind === 'restock' ? '📦 Estoque reposto (' + result.stock + ' unidades)'
         : (kind === 'nina' ? '🤖 Nina fez um pedido fictício: ' :
           '☕ Pedido registrado: ') + result.receipt.product +
@@ -183,6 +186,18 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
       return false;
     } finally { setWorking(false); }
   }
+  function setCommerceTab(tab, focusPanel = true) {
+    const isChat = tab === 'chat';
+    $('commerce-panel-chat').hidden = !isChat;
+    $('commerce-panel-quick').hidden = isChat;
+    $('commerce-tab-chat').setAttribute('aria-selected', String(isChat));
+    $('commerce-tab-quick').setAttribute('aria-selected', String(!isChat));
+    $('commerce-tab-chat').tabIndex = isChat ? 0 : -1;
+    $('commerce-tab-quick').tabIndex = isChat ? -1 : 0;
+    (focusPanel
+      ? (isChat ? $('commerce-attendant-input') : $('commerce-product'))
+      : (isChat ? $('commerce-tab-chat') : $('commerce-tab-quick'))).focus();
+  }
   function say(author, message) {
     const line = document.createElement('div');
     line.className = 'commerce-attendant-line';
@@ -193,6 +208,7 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
     line.append(who, content);
     const history = $('commerce-attendant-history');
     history.appendChild(line);
+    while (history.childElementCount > 28) history.firstElementChild.remove();
     history.scrollTop = history.scrollHeight;
   }
   function resetAttendant() {
@@ -281,6 +297,16 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
   $('commerce-interact').addEventListener('click', open);
   $('commerce-refresh').addEventListener('click', () => { void synchronize(); });
   $('commerce-close').addEventListener('click', close);
+  $('commerce-tab-chat').addEventListener('click', () => setCommerceTab('chat'));
+  $('commerce-tab-quick').addEventListener('click', () => setCommerceTab('quick'));
+  for (const tab of ['chat', 'quick']) {
+    $('commerce-tab-' + tab).addEventListener('keydown', event => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        setCommerceTab(tab === 'chat' ? 'quick' : 'chat', false);
+      }
+    });
+  }
   $('commerce-buy').addEventListener('click', () => { void transact('buy'); });
   $('commerce-restock').addEventListener('click', () => { void transact('restock'); });
   $('commerce-nina-order').addEventListener('click', () => { void transact('nina'); });
