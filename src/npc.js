@@ -176,7 +176,34 @@ export function createNPC(scene, baseColliders, dynamicColliders) {
       walking
     };
   }
-  function onWorldChanged() { planCooldown = 0; }
+  function onWorldChanged() {
+    planCooldown = 0;
+    path = [];
+    pathEnd = null;
+    planTarget = null;
+    // Construções persistidas podem ocupar a posição inicial ao recarregar.
+    // Reposiciona Nina para uma área transitável, sem remover lojas ou estoque.
+    const blockers = obstacles();
+    if (npcPassable(position.x, position.z, blockers)) return;
+    const start = { ...position };
+    for (let radius = 0.75; radius <= 19; radius += 0.75) {
+      let relocated = false;
+      for (let i = 0; i < 32; i++) {
+        const angle = 2 * Math.PI * i / 32;
+        const x = start.x + Math.cos(angle) * radius;
+        const z = start.z + Math.sin(angle) * radius;
+        if (npcPassable(x, z, blockers)) {
+          position.x = x;
+          position.z = z;
+          collider.x = x;
+          collider.z = z;
+          relocated = true;
+          break;
+        }
+      }
+      if (relocated) return;
+    }
+  }
   character.update({
     x: position.x, y: heightAt(position.x, position.z), z: position.z,
     heading, walking: false, time: 0, action: 'idle', nearPlayer: false

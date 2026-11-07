@@ -5,6 +5,8 @@ export function canOpenCafe(x, z, shops = []) {
   if (!Number.isFinite(x) || !Number.isFinite(z) || !insideWorld(x, z)) return false;
   if (distanceToLake(x, z) < LAKE.radius + 6.2) return false;
   if (Math.hypot(x, z - 6) < 8) return false;
+  // Protege também o local de nascimento da primeira moradora autônoma.
+  if (Math.hypot(x - 6.4, z - 9.2) < 5.3) return false;
   if (Math.hypot(x + 14, z - 15) < 6.6 ||
       Math.hypot(x + 23, z - 21) < 6.6 ||
       Math.hypot(x - 14, z - 22) < 6.6) return false;

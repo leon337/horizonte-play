@@ -98,3 +98,10 @@ test('não coloca nova loja no mesmo terreno de uma existente',async()=>{
   assert.ok(canOpenCafe(spot.x,spot.z,occupied));
   assert.ok(Math.hypot(spot.x-9,spot.z-12)>=10);
 });
+
+test('a área de nascimento de Nina é reservada para evitar travamentos',async()=>{
+  const {canOpenCafe}=await import('../src/commerce-placement.js');
+  assert.equal(canOpenCafe(9,12),false);
+  assert.equal(canOpenCafe(6.4,9.2),false);
+  assert.equal(canOpenCafe(12,5),true);
+});

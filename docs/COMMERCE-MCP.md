@@ -15,6 +15,8 @@ separado por loja ou bloco. O primeiro tipo é uma **cafeteria de balcão**.
   casas existentes, água, blocos e outros estabelecimentos.
 - Visualizar placa, fachada, toldo, balcão, itens e atendente cenográfico.
 - Aproximar-se e pressionar **G** para entrar no atendimento.
+- Proteger o nascimento da Nina; se uma loja antiga já ocupar o ponto de spawn,
+  ela é reposicionada em terreno transitável sem remover lojas ou vendas.
 - Comprar café, pão de queijo ou suco com moedas **100% fictícias**.
 - Consultar estoque, visualizar caixa e repor estoque ficticiamente.
 - Simular pedido da Nina (cliente) sem gastar as moedas do jogador.
