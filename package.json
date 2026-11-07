@@ -1,16 +1,20 @@
 {
   "name": "projeto-base-3d",
-  "version": "4.1.0",
+  "version": "4.6.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --test tests/terrain.test.js tests/building.test.js tests/water.test.js tests/graphics.test.js tests/swimming-animation.test.js"
+    "mcp:commerce": "node server/commerce-mcp.mjs",
+    "test": "node --test tests/terrain.test.js tests/building.test.js tests/water.test.js tests/graphics.test.js tests/swimming-animation.test.js tests/npc-brain.test.js tests/npc-navigation.test.js tests/gemini-bridge.test.js tests/npc-live.test.js tests/commerce-domain.test.js tests/commerce-mcp.test.js tests/commerce-attendant.test.js"
   },
   "dependencies": {
-    "three": "^0.181.0"
+    "@google/genai": "^3.0.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "three": "^0.181.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "vite": "^7.1.0"

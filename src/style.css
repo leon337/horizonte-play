@@ -80,3 +80,190 @@ kbd{font-family:inherit;font-size:9px;font-weight:900;border:1px solid #bdc9dd;b
 .graphics-status{position:absolute;top:76px;right:0;background:#eff5ffe6;box-shadow:0 5px 18px #21426720;border:1px solid #ffffff;color:#526681;font-size:9px;font-weight:800;border-radius:8px;padding:6px 11px;pointer-events:none}
 @media(max-width:850px){.top-right{gap:6px}.graphics-choice{padding-left:5px}.graphics-choice>span{display:none}.graphics-status{display:none}.fps-counter{display:none}}
 @media(max-width:600px){.top-right{padding:5px 7px}.top-right .live-dot{display:none}.top-right #view-label{display:none}.graphics-choice select{min-width:75px;max-width:95px;font-size:10px;padding:6px 3px}.graphics-choice{border-left:0}}
+
+/* Horizonte Living — HUD e diálogo do primeiro NPC. */
+.npc-panel{position:absolute;bottom:123px;left:3.4%;width:258px;padding:14px 15px;
+ background:#fcfdf4f2;border:2px solid #fff;border-radius:17px;
+ box-shadow:0 7px 0 #31586d39,0 14px 28px #2e516135;color:#314665;
+ pointer-events:auto}
+.npc-panel-header{display:flex;align-items:center;gap:10px}
+.npc-portrait,.npc-chat-portrait{width:37px;height:37px;flex-shrink:0;border-radius:11px;
+ display:grid;place-items:center;background:linear-gradient(135deg,#ffba75,#ffd6b1);
+ color:#5a4574;font-size:21px;font-weight:950}
+.npc-panel-header strong{font-size:13px;font-weight:950;letter-spacing:.08em;display:block}
+.npc-panel-header small{font-size:8px;letter-spacing:.08em;color:#8190a7;font-weight:800;display:block;margin-top:3px}
+.npc-online{font-size:8px;color:#21794a;background:#ddf9e6;border-radius:6px;padding:5px 6px;font-weight:900;margin-left:auto}
+.npc-status{margin-top:12px;background:#e8f2ff;color:#5674a2;border-radius:8px;
+ padding:10px;font-size:11px;font-weight:800;min-height:34px}
+.npc-bars{display:grid;gap:7px;margin-top:12px}
+.npc-bars span{display:flex;align-items:center;gap:8px;font-size:12px}
+.npc-bars progress{flex:1;width:100%;height:8px;appearance:none;overflow:hidden;border:0;border-radius:999px;background:#e2e8f1}
+.npc-bars progress::-webkit-progress-bar{background:#e2e8f1;border-radius:999px}
+#npc-food::-webkit-progress-value{background:#f1aa76;border-radius:999px}
+#npc-energy::-webkit-progress-value{background:#65b6b9;border-radius:999px}
+#npc-social::-webkit-progress-value{background:#a18de7;border-radius:999px}
+#npc-food::-moz-progress-bar{background:#f1aa76}
+#npc-energy::-moz-progress-bar{background:#65b6b9}
+#npc-social::-moz-progress-bar{background:#a18de7}
+.npc-needs-footer{display:flex;justify-content:space-between;gap:8px;margin:12px 0;
+ font-size:9px;color:#7c8ba5;font-weight:800}
+#npc-talk-btn{display:flex;justify-content:space-between;align-items:center;width:100%;
+ border:none;background:#5b65df;color:white;font-size:11px;font-weight:900;
+ border-radius:10px;padding:10px 12px;cursor:pointer}
+#npc-talk-btn:disabled{background:#d5ddeb;color:#8e9cb0;cursor:not-allowed}
+#npc-talk-btn:focus-visible,.npc-chat button:focus-visible,.npc-chat input:focus-visible{outline:3px solid #6b5bec;outline-offset:2px}
+#npc-talk-btn kbd{color:inherit;background:#ffffff21;border-color:#ffffff65}
+.npc-chat{position:absolute;z-index:5;right:3.4%;bottom:110px;width:min(388px,93vw);
+ background:#fffdf5;border:3px solid #fff;border-radius:20px;overflow:hidden;
+ box-shadow:0 12px 0 #3753714d,0 24px 80px #203a4e66;color:#2c4266}
+.npc-chat-header{display:flex;align-items:center;gap:10px;padding:15px;border-bottom:1px solid #e4e8ed;background:#fffaf0}
+.npc-chat-header strong{display:block;font-size:13px;font-weight:950}
+.npc-chat-header small{font-size:10px;color:#8b94a9;display:block;margin-top:3px}
+.npc-chat-header button{margin-left:auto;border:0;border-radius:8px;background:#ebedf5;color:#59657c;
+ width:32px;height:32px;font-size:15px;font-weight:900;cursor:pointer}
+.npc-chat-history{display:flex;flex-direction:column;gap:10px;padding:17px;max-height:265px;
+ min-height:138px;overflow-y:auto;scrollbar-width:thin;background:#fffefa}
+.npc-message{display:flex;flex-direction:column;gap:5px;margin:0;max-width:89%;font-size:12px;line-height:1.5;
+ padding:10px 13px;border-radius:11px;overflow-wrap:anywhere}
+.npc-message strong{font-size:9px;letter-spacing:.11em;font-weight:950}
+.npc-message.npc-says{align-self:flex-start;background:#f0eaff;color:#52497c}
+.npc-message.player-says{align-self:flex-end;background:#dfedff;color:#345781}
+#npc-chat-form{display:flex;gap:7px;padding:12px 14px 7px;background:#fff}
+#npc-chat-input{min-width:0;flex:1;border:1px solid #cbd7eb;background:#f6f8fe;border-radius:10px;
+ padding:12px;font:500 12px system-ui;color:#243b61}
+#npc-chat-send{border:0;background:#675af2;color:#fff;border-radius:9px;padding:10px 13px;
+ font-size:11px;font-weight:900;cursor:pointer}
+.npc-chat-help{padding:0 14px 13px;margin:0;background:#fff;font-size:10px;line-height:1.55;color:#7c879e}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:950px){.npc-panel{left:2%;width:218px;bottom:112px;padding:10px}.npc-chat{right:2%;width:min(350px,90vw)}}
+@media(max-width:650px){.npc-panel{left:3%;bottom:133px;width:173px;padding:8px;border-radius:12px}
+.npc-portrait{width:29px;height:29px;font-size:17px}.npc-panel-header{gap:5px}
+.npc-panel-header strong{font-size:11px}.npc-panel-header small,.npc-online{font-size:7px}
+.npc-status{font-size:9px;margin-top:8px;padding:7px;min-height:23px}
+.npc-bars{gap:4px;margin-top:6px}.npc-bars span{font-size:10px}
+.npc-needs-footer{margin:7px 0;font-size:8px}.npc-needs-footer span:first-child{display:none}
+#npc-talk-btn{padding:7px 8px;font-size:9px}
+.npc-chat{right:3%;bottom:107px;width:94vw}.npc-chat-history{max-height:190px}
+}
+
+#npc-curiosity::-webkit-progress-value{background:#91aee3;border-radius:999px}
+#npc-curiosity::-moz-progress-bar{background:#91aee3}
+
+/* Gemini Live: conexão explicitamente opt-in, indicadores de áudio e custo. */
+.npc-live-controls{
+  display:flex;align-items:center;flex-wrap:wrap;gap:7px;
+  padding:10px 14px;background:#f2f6fd;border-bottom:1px solid #dae5ee;
+}
+#npc-live-connect,#npc-live-mic{
+  padding:8px 10px;border:0;border-radius:9px;cursor:pointer;
+  font-size:10px;font-weight:850;letter-spacing:.01em;
+}
+#npc-live-connect{background:#615be5;color:#fff;flex:1;min-width:140px}
+#npc-live-mic{background:#d9edff;color:#315f85}
+#npc-live-mic:disabled{opacity:.5;cursor:default}
+#npc-live-connect:disabled{opacity:.65;cursor:wait}
+#npc-live-status{display:block;flex-basis:100%;font:750 10px system-ui;color:#70829a}
+@media(max-width:600px){
+  .npc-live-controls{padding:8px 10px}
+  #npc-live-connect,#npc-live-mic{font-size:9px}
+}
+
+/* Horizonte Commerce — lojas criadas via MCP central (100% economia fictícia). */
+.commerce-hud{position:absolute;top:357px;right:3.4%;width:258px;padding:14px;
+  pointer-events:auto;border:2px solid #ffffff;border-radius:17px;
+  box-shadow:0 7px 0 #3f506e2d,0 15px 36px #304d7038;
+  background:#fffaf0f5;color:#364960}
+.commerce-title{display:flex;align-items:center;justify-content:space-between;
+  gap:6px;font-size:12px;font-weight:950;letter-spacing:.02em}
+.commerce-title small{font-size:10px;color:#996c50;background:#fbe6d2;
+  padding:5px 7px;border-radius:6px;white-space:nowrap}
+.commerce-connection{margin:9px 0;font-size:10px;font-weight:800;
+  color:#387d76;background:#e1f4f1;padding:8px;border-radius:8px}
+.commerce-wallet{margin:7px 0 10px;font-size:11px;color:#655c4c}
+.commerce-wallet strong{color:#9b714a}
+.commerce-name-label{display:block;margin-bottom:5px;color:#697a8b;
+  font-size:9px;font-weight:900;letter-spacing:.05em}
+#commerce-name{display:block;width:100%;box-sizing:border-box;border-radius:8px;
+  border:1px solid #d8c9b8;background:#fff;color:#4c4e60;
+  padding:8px;font:750 11px system-ui}
+#commerce-create,#commerce-interact{display:flex;width:100%;align-items:center;
+  justify-content:space-between;padding:9px 10px;margin-top:7px;cursor:pointer;
+  border:0;border-radius:9px;color:white;font-size:11px;font-weight:900}
+#commerce-create{background:#e08160}
+#commerce-interact{background:#5969ca}
+#commerce-create:disabled,#commerce-interact:disabled{opacity:.5;cursor:not-allowed}
+#commerce-create kbd,#commerce-interact kbd{background:#ffffff22;color:white;border-color:#ffffff70}
+.commerce-status-row{display:flex;align-items:center;justify-content:space-between;
+  font-size:10px;color:#7f8b99;margin-top:10px;gap:7px;font-weight:700}
+#commerce-refresh{border:0;border-radius:7px;background:#eaf0f5;
+  padding:4px 9px;color:#57677c;cursor:pointer;font-weight:900}
+.commerce-modal{position:absolute;z-index:6;top:50%;left:50%;
+  transform:translate(-50%,-50%);width:min(425px,93vw);border-radius:19px;
+  overflow:hidden;color:#34425c;background:#fffcf6;
+  border:3px solid white;box-shadow:0 22px 90px #1827479e}
+.commerce-modal-header{display:flex;align-items:center;gap:12px;
+  background:#fff0dc;padding:16px;border-bottom:1px solid #e6d9c5}
+.commerce-modal-icon{display:grid;place-items:center;width:49px;height:49px;
+  flex-shrink:0;background:#ffddb3;border-radius:13px;font-size:25px}
+.commerce-modal-header h2{margin:0;color:#674663;font-size:19px;font-weight:950;
+  line-height:1.1;overflow-wrap:anywhere}
+.commerce-modal-header p{margin:4px 0 0;color:#947984;font-size:11px}
+#commerce-close{margin-left:auto;align-self:flex-start;border:0;border-radius:8px;
+  background:#f4dfd6;color:#805865;width:31px;height:31px;cursor:pointer}
+.commerce-modal-body{padding:18px}
+.commerce-fake-money{font-size:10px;font-weight:900;color:#7c6548;
+  background:#fff2d4;border-radius:8px;padding:11px;margin-bottom:14px}
+.commerce-modal-body>label,#commerce-panel-quick>label{display:block;margin:12px 0 6px;font-size:11px;font-weight:900;color:#66647a}
+#commerce-product,#commerce-quantity{width:100%;box-sizing:border-box;
+  border-radius:9px;border:1px solid #c5cbda;
+  background:#fff;color:#3c4b63;padding:11px;font:750 12px system-ui}
+.commerce-buy{display:block;width:100%;border:0;border-radius:10px;
+  background:#5e69e3;color:white;cursor:pointer;font-size:12px;
+  font-weight:900;padding:12px;margin-top:15px}
+.commerce-other-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.commerce-other-actions button{padding:10px 7px;border:1px solid #c9d9e5;
+  background:#edf4ff;color:#43597a;border-radius:10px;font-size:10px;
+  cursor:pointer;font-weight:850}
+.commerce-modal button:disabled{opacity:.55;cursor:wait}
+#commerce-feedback{font-size:11px;line-height:1.45;font-weight:750;
+  background:#eaf5ed;color:#426859;padding:11px;border-radius:9px;min-height:32px}
+.commerce-modal-body>small{font-size:9px;color:#8e8e98}
+.commerce-modal{max-height:90vh;overflow-y:auto}
+.commerce-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#f3ebdf;border-radius:10px;padding:5px;margin-bottom:10px}
+.commerce-tabs button{border:0;background:transparent;color:#7d6e78;border-radius:8px;padding:10px 5px;font-size:11px;font-weight:850;cursor:pointer}
+.commerce-tabs button[aria-selected="true"]{background:white;color:#5a4ca7;box-shadow:0 2px 8px #806b6129}
+#commerce-panel-quick{padding-top:2px}
+.commerce-attendant{padding-top:8px}
+.commerce-attendant h3{font-size:13px;margin:0 0 4px;color:#674663}
+#commerce-attendant-mode{display:block;font-size:10px;color:#6e7a88;margin-bottom:9px}
+.commerce-attendant-history{border:1px solid #e6d9c5;background:#fff;border-radius:10px;
+  min-height:165px;max-height:270px;overflow-y:auto;padding:12px;font-size:12px;line-height:1.55}
+.commerce-attendant-line{margin-bottom:12px;overflow-wrap:anywhere}
+.commerce-attendant-line strong{color:#6b539d}
+#commerce-attendant-form{display:flex;gap:6px;margin-top:9px}
+#commerce-attendant-input{width:100%;min-width:0;flex:1;border:1px solid #c5cbda;
+  border-radius:9px;padding:9px;background:white;color:#34425c;font-size:11px}
+#commerce-attendant-send{border:0;border-radius:9px;background:#5969ca;color:white;
+  padding:8px 11px;font-size:11px;font-weight:800;cursor:pointer}
+.commerce-attendant-ai{display:flex;align-items:flex-start;gap:8px;margin:9px 0;
+  font-size:10px;line-height:1.45;color:#6e6471}
+#commerce-attendant-confirm{width:100%;background:#3b846e;color:white;border:0;
+  border-radius:9px;padding:11px;font-size:11px;font-weight:900;cursor:pointer}
+.commerce-hud button:focus-visible,.commerce-modal button:focus-visible,
+.commerce-hud input:focus-visible,.commerce-modal input:focus-visible,
+.commerce-modal select:focus-visible{outline:3px solid #7968de;outline-offset:2px}
+@media(max-width:900px){
+  .commerce-hud{right:2%;top:356px;width:210px;padding:10px}
+}
+@media(max-width:650px){
+  .commerce-hud{top:333px;right:3%;width:166px;padding:8px;border-radius:11px}
+  .commerce-title{font-size:10px}.commerce-connection{font-size:8px;padding:5px}
+  #commerce-name{font-size:9px;padding:6px}
+  #commerce-create,#commerce-interact{font-size:9px;padding:7px}
+  .commerce-wallet,.commerce-name-label,.commerce-status-row{font-size:8px}
+  .commerce-modal{max-height:85vh;overflow:auto}
+  .commerce-modal-body{padding:12px}
+  .commerce-modal-header h2{font-size:16px}
+  .commerce-other-actions button{font-size:9px}
+}
+[hidden]{display:none!important}
