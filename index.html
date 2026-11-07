@@ -149,6 +149,25 @@
         <button id="commerce-restock" type="button">📦 Repor estoque</button>
       </div>
       <p id="commerce-feedback" role="status">Selecione um produto.</p>
+      <section class="commerce-attendant" aria-label="Conversa com atendente inteligente">
+        <h3>💬 Alex · Atendente inteligente</h3>
+        <small id="commerce-attendant-mode" role="status">Atendimento local · sem custo de IA</small>
+        <div id="commerce-attendant-history" class="commerce-attendant-history"
+          aria-live="polite" aria-label="Histórico da conversa"></div>
+        <form id="commerce-attendant-form" autocomplete="off">
+          <label for="commerce-attendant-input" class="sr-only">Fale com Alex</label>
+          <input id="commerce-attendant-input" type="text" maxlength="240"
+            placeholder="Ex.: Quero dois cafés" required>
+          <button id="commerce-attendant-send" type="submit">Enviar</button>
+        </form>
+        <label class="commerce-attendant-ai">
+          <input id="commerce-attendant-gemini" type="checkbox">
+          Usar Gemini para interpretar pedidos (opcional, pode gerar custos)
+        </label>
+        <button id="commerce-attendant-confirm" type="button" hidden>
+          ✅ Confirmar compra com moedas virtuais
+        </button>
+      </section>
       <small>Servidor MCP: listar estabelecimentos, estoque, pedidos e caixa.</small>
     </div>
   </section>
@@ -157,7 +176,7 @@
     <button id="reset-btn" type="button" hidden>↺ Renascer <kbd>R</kbd></button>
   </div>
   <div id="toast" role="status" class="toast" hidden></div>
-  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> COMMERCE 4.4</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
+  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> COMMERCE 4.5</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
   <div id="error" hidden role="alert">Este navegador não conseguiu iniciar o mundo 3D. Verifique o WebGL e a aceleração gráfica.</div>
 </div>
 <script type="module" src="/src/main.js"></script>

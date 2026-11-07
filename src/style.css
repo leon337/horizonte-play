@@ -228,6 +228,23 @@ kbd{font-family:inherit;font-size:9px;font-weight:900;border:1px solid #bdc9dd;b
 #commerce-feedback{font-size:11px;line-height:1.45;font-weight:750;
   background:#eaf5ed;color:#426859;padding:11px;border-radius:9px;min-height:32px}
 .commerce-modal-body>small{font-size:9px;color:#8e8e98}
+.commerce-modal{max-height:90vh;overflow-y:auto}
+.commerce-attendant{border-top:1px solid #e6d9c5;margin-top:15px;padding-top:12px}
+.commerce-attendant h3{font-size:13px;margin:0 0 4px;color:#674663}
+#commerce-attendant-mode{display:block;font-size:10px;color:#6e7a88;margin-bottom:9px}
+.commerce-attendant-history{border:1px solid #e6d9c5;background:#fff;border-radius:10px;
+  min-height:64px;max-height:120px;overflow-y:auto;padding:9px;font-size:11px;line-height:1.5}
+.commerce-attendant-line{margin-bottom:7px;overflow-wrap:anywhere}
+.commerce-attendant-line strong{color:#6b539d}
+#commerce-attendant-form{display:flex;gap:6px;margin-top:9px}
+#commerce-attendant-input{width:100%;min-width:0;flex:1;border:1px solid #c5cbda;
+  border-radius:9px;padding:9px;background:white;color:#34425c;font-size:11px}
+#commerce-attendant-send{border:0;border-radius:9px;background:#5969ca;color:white;
+  padding:8px 11px;font-size:11px;font-weight:800;cursor:pointer}
+.commerce-attendant-ai{display:flex;align-items:flex-start;gap:8px;margin:9px 0;
+  font-size:10px;line-height:1.45;color:#6e6471}
+#commerce-attendant-confirm{width:100%;background:#3b846e;color:white;border:0;
+  border-radius:9px;padding:11px;font-size:11px;font-weight:900;cursor:pointer}
 .commerce-hud button:focus-visible,.commerce-modal button:focus-visible,
 .commerce-hud input:focus-visible,.commerce-modal input:focus-visible,
 .commerce-modal select:focus-visible{outline:3px solid #7968de;outline-offset:2px}

@@ -5,7 +5,10 @@ import { pathToFileURL } from 'node:url';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import * as z from 'zod/v4';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createCommerce, COMMERCE_PORT } from './commerce-domain.mjs';
+import { createAttendantService } from './commerce-attendant.mjs';
 
 export const ALLOWED_ORIGINS = new Set([
   'http://127.0.0.1:5173', 'http://localhost:5173',
@@ -114,7 +117,44 @@ export function createCommerceMcpServer(store) {
   return mcp;
 }
 
-export function createCommerceHandler(store, { allowedHosts = VALID_HOSTS } = {}) {
+// O atendente chama ferramentas reais do MCP, no mesmo processo e com transporte
+// em memória. Assim nenhuma loja precisa de servidor MCP próprio.
+async function invokeCommerceTool(store, name, args) {
+  const server = createCommerceMcpServer(store);
+  const client = new Client({ name: 'horizonte-attendant', version: '1.0.0' },
+    { capabilities: {} });
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  try {
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+    const result = await client.callTool({ name, arguments: args });
+    if (result.isError) {
+      const msg = result.content?.find(part => part.type === 'text')?.text || 'Pedido recusado.';
+      const error = new Error(msg);
+      error.status = /Estoque insuficiente|moedas virtuais suficientes/.test(msg) ? 409 : 400;
+      throw error;
+    }
+    return JSON.parse(result.content.find(part => part.type === 'text').text);
+  } finally {
+    await client.close().catch(() => {});
+    await server.close().catch(() => {});
+  }
+}
+async function interpretWithGemini(message) {
+  const response = await fetch('http://127.0.0.1:4174/api/attendant/parse', {
+    method: 'POST',
+    headers: { Origin: 'http://127.0.0.1:5173', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message }),
+    signal: AbortSignal.timeout(8000)
+  });
+  if (!response.ok) throw new Error('Gemini indisponível');
+  return response.json();
+}
+export function createCommerceHandler(store, {
+  allowedHosts = VALID_HOSTS, interpreter = interpretWithGemini
+} = {}) {
+  const attendant = createAttendantService(
+    (name, args) => invokeCommerceTool(store, name, args), { interpreter });
   return async function handle(req, res) {
     const origin = req.headers.origin || '';
     const allowed = ALLOWED_ORIGINS.has(origin) ? origin : null;
@@ -167,6 +207,16 @@ export function createCommerceHandler(store, { allowedHosts = VALID_HOSTS } = {}
         return sendJson(res, 200, store.snapshot(), allowed);
       if (url.pathname === '/api/shops' && req.method === 'POST')
         return sendJson(res, 201, store.createCafe(await readJson(req)), allowed);
+      const aiRoute = url.pathname.match(
+        /^\/api\/shops\/([a-z0-9-]+)\/attendant\/(chat|confirm)$/);
+      if (aiRoute && req.method === 'POST') {
+        const [, shopId, action] = aiRoute;
+        const body = await readJson(req, 4096);
+        const result = action === 'chat'
+          ? await attendant.chat({ ...body, shopId })
+          : await attendant.confirm({ ...body, shopId });
+        return sendJson(res, action === 'chat' ? 200 : 201, result, allowed);
+      }
 
       const match = url.pathname.match(/^\/api\/shops\/([a-z0-9-]+)\/(inventory|orders|restock|cash)$/);
       if (match) {

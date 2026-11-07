@@ -10,7 +10,7 @@ async function call(path, options = {}) {
       cache: 'no-store',
       headers: options.data ? { 'Content-Type': 'application/json' } : {},
       body: options.data ? JSON.stringify(options.data) : undefined,
-      signal: AbortSignal.timeout(9000)
+      signal: AbortSignal.timeout(14000)
     });
   } catch {
     throw new Error('Servidor MCP de lojas offline. Inicie o Horizonte pelo atalho.');
@@ -31,6 +31,7 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
   let state = { shops: [], wallet: 180, maxShops: 8, catalog: {} };
   let online = false, working = false, modalOpen = false;
   let activeShop = null, lastHud = -1;
+  let pendingQuote = null;
 
   function updateState(data) {
     if (!data || !Array.isArray(data.shops)) return;
@@ -85,6 +86,9 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
     $('commerce-buy').disabled = value;
     $('commerce-restock').disabled = value;
     $('commerce-nina-order').disabled = value;
+    $('commerce-attendant-send').disabled = value;
+    $('commerce-attendant-input').disabled = value;
+    $('commerce-attendant-confirm').disabled = value;
     render();
   }
   async function createCafe() {
@@ -135,6 +139,7 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
     $('commerce-modal').hidden = false;
     text('commerce-feedback', 'Bem-vindo! Escolha um produto ou veja o caixa.');
     renderProducts(activeShop);
+    resetAttendant();
     render();
     $('commerce-product').focus();
     return true;
@@ -142,6 +147,7 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
   function close() {
     if (!modalOpen) return;
     modalOpen = false;
+    pendingQuote = null;
     activeShop = null;
     $('commerce-modal').hidden = true;
     if (restoreFocus) restoreFocus();
@@ -177,6 +183,81 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
       return false;
     } finally { setWorking(false); }
   }
+  function say(author, message) {
+    const line = document.createElement('div');
+    line.className = 'commerce-attendant-line';
+    const who = document.createElement('strong');
+    who.textContent = author + ': ';
+    const content = document.createElement('span');
+    content.textContent = String(message);
+    line.append(who, content);
+    const history = $('commerce-attendant-history');
+    history.appendChild(line);
+    history.scrollTop = history.scrollHeight;
+  }
+  function resetAttendant() {
+    pendingQuote = null;
+    $('commerce-attendant-confirm').hidden = true;
+    $('commerce-attendant-history').replaceChildren();
+    $('commerce-attendant-input').value = '';
+    $('commerce-attendant-gemini').checked = false;
+    text('commerce-attendant-mode', 'Atendimento local · sem custo de IA');
+    say('Alex', 'Olá! Consulte o cardápio ou diga o que gostaria de comprar.');
+  }
+  async function sendAttendant(event) {
+    event.preventDefault();
+    if (!modalOpen || !online || !activeShop || working) return;
+    const shopId = activeShop.id;
+    const message = $('commerce-attendant-input').value.trim();
+    if (!message) return;
+    $('commerce-attendant-input').value = '';
+    pendingQuote = null;
+    $('commerce-attendant-confirm').hidden = true;
+    say('Você', message);
+    setWorking(true);
+    try {
+      const result = await call('/api/shops/' + encodeURIComponent(shopId) +
+        '/attendant/chat', { data: {
+          message, useGemini: $('commerce-attendant-gemini').checked
+        } });
+      if (!modalOpen || activeShop?.id !== shopId) return;
+      say('Alex', result.message);
+      pendingQuote = result.proposal;
+      $('commerce-attendant-confirm').hidden = !pendingQuote;
+      text('commerce-attendant-mode', result.mode === 'gemini'
+        ? 'Gemini · interpretação de texto'
+        : result.mode === 'local-fallback'
+          ? 'Modo local · Gemini indisponível'
+          : 'Atendimento local · sem custo de IA');
+    } catch (error) {
+      if (modalOpen && activeShop?.id === shopId) say('Sistema', error.message);
+    } finally {
+      setWorking(false);
+      if (modalOpen && activeShop?.id === shopId) $('commerce-attendant-input').focus();
+    }
+  }
+  async function confirmAttendant() {
+    if (!modalOpen || !online || !activeShop || working || !pendingQuote) return;
+    const shopId = activeShop.id;
+    const proposalId = pendingQuote.id;
+    pendingQuote = null;
+    $('commerce-attendant-confirm').hidden = true;
+    setWorking(true);
+    try {
+      const result = await call('/api/shops/' + encodeURIComponent(shopId) +
+        '/attendant/confirm', { data: { proposalId } });
+      await synchronize();
+      if (modalOpen && activeShop?.id === shopId) {
+        renderProducts(activeShop);
+        say('Alex', 'Pedido ' + result.receipt.id + ' registrado: ' +
+          result.receipt.quantity + ' × ' + result.receipt.product + ' · ' +
+          result.receipt.amount + ' moedas virtuais.');
+        text('commerce-feedback', 'Compra confirmada. Saldo: ' + result.wallet + ' moedas.');
+      }
+    } catch (error) {
+      if (modalOpen && activeShop?.id === shopId) say('Sistema', error.message);
+    } finally { setWorking(false); }
+  }
   function onKey(key) {
     if (modalOpen) {
       if (key === 'escape') close();
@@ -203,6 +284,12 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
   $('commerce-buy').addEventListener('click', () => { void transact('buy'); });
   $('commerce-restock').addEventListener('click', () => { void transact('restock'); });
   $('commerce-nina-order').addEventListener('click', () => { void transact('nina'); });
+  $('commerce-attendant-form').addEventListener('submit', event => {
+    void sendAttendant(event);
+  });
+  $('commerce-attendant-confirm').addEventListener('click', () => {
+    void confirmAttendant();
+  });
   void synchronize();
   return {
     update, close, onKey, createCafe, open, synchronize,
