@@ -109,6 +109,12 @@
             Ativa</label>
         </div>
         <small id="network-status" role="status">Nina e Alex conectados · aguardando missão</small>
+        <label class="network-gemini-opt">
+          <input id="network-gemini" type="checkbox">
+          ✨ Diálogos Gemini por API (pode gerar custos)
+        </label>
+        <small id="network-ai-status">IA desligada · limite 6/10 min e 20/24 h</small>
+        <small id="network-memory-status">💾 Memória persistente · carregando</small>
         <div id="network-messages" class="network-messages" role="log"
           aria-label="Mensagens entre agentes" aria-live="polite"></div>
         <small class="network-disclaimer">Tarefas demonstrativas · só consulta MCP · sem compras automáticas</small>
@@ -199,7 +205,7 @@
     <button id="reset-btn" type="button" hidden>↺ Renascer <kbd>R</kbd></button>
   </div>
   <div id="toast" role="status" class="toast" hidden></div>
-  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> COMMERCE 4.8</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
+  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> COMMERCE 4.9</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
   <div id="error" hidden role="alert">Este navegador não conseguiu iniciar o mundo 3D. Verifique o WebGL e a aceleração gráfica.</div>
 </div>
 <script type="module" src="/src/main.js"></script>

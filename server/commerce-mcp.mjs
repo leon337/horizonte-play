@@ -8,6 +8,7 @@ import * as z from 'zod/v4';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createCommerce, COMMERCE_PORT } from './commerce-domain.mjs';
+import { createAgentMemory } from './agent-memory.mjs';
 import { createAttendantService } from './commerce-attendant.mjs';
 
 export const ALLOWED_ORIGINS = new Set([
@@ -140,6 +141,17 @@ async function invokeCommerceTool(store, name, args) {
     await server.close().catch(() => {});
   }
 }
+async function generateAgentDialogue(payload) {
+  const res=await fetch('http://127.0.0.1:4174/api/agents/generate',{
+    method:'POST',
+    headers:{ Origin:'http://127.0.0.1:5173',
+      'Content-Type':'application/json' },
+    body:JSON.stringify(payload),signal:AbortSignal.timeout(12000)
+  });
+  if(!res.ok)throw Object.assign(new Error('Diálogo Gemini indisponível.'),
+    {status:res.status===429?429:502});
+  return res.json();
+}
 async function interpretWithGemini(message) {
   const response = await fetch('http://127.0.0.1:4174/api/attendant/parse', {
     method: 'POST',
@@ -151,7 +163,8 @@ async function interpretWithGemini(message) {
   return response.json();
 }
 export function createCommerceHandler(store, {
-  allowedHosts = VALID_HOSTS, interpreter = interpretWithGemini
+  allowedHosts = VALID_HOSTS, interpreter = interpretWithGemini,
+  memory = createAgentMemory(), dialogueService = generateAgentDialogue
 } = {}) {
   const attendant = createAttendantService(
     (name, args) => invokeCommerceTool(store, name, args), { interpreter });
@@ -218,6 +231,44 @@ export function createCommerceHandler(store, {
         return sendJson(res, action === 'chat' ? 200 : 201, result, allowed);
       }
 
+      if(url.pathname==='/api/agents/memory' && req.method==='GET'){
+        const shopId=url.searchParams.get('shopId')||'';
+        if(shopId && !/^cafe-\d{1,8}$/.test(shopId))
+          return sendJson(res,400,{error:'Cafeteria inválida.'},allowed);
+        return sendJson(res,200,memory.summary(shopId),allowed);
+      }
+      if(url.pathname==='/api/agents/memory/completed'&&req.method==='POST'){
+        const body=await readJson(req,2048);
+        store.get(body.shopId);
+        return sendJson(res,200,memory.recordCompletedTask(body),allowed);
+      }
+      if(url.pathname==='/api/agents/dialogue'&&req.method==='POST'){
+        const body=await readJson(req,4096);
+        const {agentId,recipient,kind,taskId,fallback,context}=body;
+        const valid=id=>typeof id==='string' &&
+          /^(nina|alex:cafe-\d{1,8})$/.test(id);
+        if(!valid(agentId)||!valid(recipient)||
+            (agentId==='nina')===(recipient==='nina') ||
+            !['inventory_request','inventory_report','demo_request','demo_accept']
+              .includes(kind) ||
+            typeof taskId!=='string'||!/^task-[a-z0-9-]{1,45}$/.test(taskId)||
+            typeof fallback!=='string'||!fallback||fallback.length>180||
+            typeof context!=='string'||context.length>450)
+          return sendJson(res,400,{error:'Diálogo não autorizado.'},allowed);
+        const shopId=(agentId==='nina'?recipient:agentId).slice(5);
+        store.get(shopId);
+        const old=memory.recall(agentId,6).map(item=>item.text);
+        const reply=await dialogueService({agentId,recipient,kind,fallback,
+          context,memory:old});
+        if(!reply || typeof reply.text!=='string' || !reply.text.trim() ||
+            reply.text.length>180)
+          return sendJson(res,502,{error:'Fala inválida da IA.'},allowed);
+        memory.append(agentId,{kind:'dialogue',
+          id:'speech:'+taskId+':'+kind,
+          text:reply.text,partner:recipient});
+        return sendJson(res,200,{text:reply.text,mode:'gemini',
+          memorySaved:true},allowed);
+      }
       // Gateway multiagente somente leitura, executado por ferramenta MCP real.
       // Não expõe criação, compras ou reposição para agentes autônomos.
       const networkRoute = url.pathname.match(

@@ -1,4 +1,4 @@
-# Horizonte Play 4.8 — Rede multiagente Nina e Alex
+# Horizonte Play 4.9 — Rede multiagente Gemini e memória persistente
 
 **Um jogo sandbox 3D original, explorável no navegador**, construído com [Three.js](https://threejs.org/) e [Vite](https://vite.dev/).
 
@@ -17,7 +17,9 @@
 - 🏪 **Horizonte Commerce:** construa cafeterias 3D com servidor MCP central, produtos, estoque e pedidos fictícios.
 - 💬 **Alex, atendente inteligente:** conversa em português, consulta estoque e prepara pedidos por MCP. Compra só após confirmação do jogador; Gemini textual opcional.
 - 🤖 **Alex NPC 3D:** atendente animado em cada cafeteria, com rotina interna, saudações, gestos e reações à presença de Nina.
-- 🔗 **Rede multiagente (4.8):** Nina e Alex trocam mensagens nos dois sentidos, consultam estoque real por MCP e concluem demonstrações colaborativas, sem debitar moedas ou alterar estoque. Painel rastreável no jogo e opção de desligar.
+- 🔗 **Rede multiagente:** Nina e Alex trocam mensagens nos dois sentidos, consultam estoque pelo MCP e concluem demonstrações colaborativas sem alterar a economia.
+- 💾 **Memória persistente (4.9):** cada agente mantém lembranças limitadas de conversas e missões no computador, recuperadas após reinício.
+- ✨ **Gemini opcional entre NPCs (4.9):** falas geradas por API com chave no backend, limites de 6 chamadas/10 minutos e 20/24 horas, persistidos em disco. Desligado por padrão para controlar custos.
 
 ## Executar localmente
 
@@ -85,7 +87,7 @@ Veja também a [especificação do MVP da Nina](docs/NPC-MVP.md).
 
 ## Estado do projeto
 
-Versão experimental **4.8**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
+Versão experimental **4.9**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
 
 **Observação:** o repositório contém apenas o código-fonte, os testes e uma imagem de apresentação. Backups, dependências, builds locais e capturas de teste ficam fora do Git.
 
@@ -108,8 +110,12 @@ e [plano técnico e critérios do NPC 3D](docs/ATENDENTE-NPC-47.md).
 mensagens estruturadas, recebe uma resposta baseada em ferramenta MCP de leitura,
 propõe um trabalho em conjunto e os dois concluem uma demonstração de atendimento.
 O histórico e o botão de desligar estão no painel **Rede multiagente** à direita.
-O diálogo entre NPCs é local e determinístico, sem API paga. Veja
-[arquitetura e segurança da rede](docs/MULTIAGENT-NETWORK-48.md).
+O diálogo entre NPCs usa regras locais por padrão. Ao marcar **Diálogos Gemini por API**,
+Nina e Alex geram falas curtas com seus próprios contextos e memórias salvas. Isso
+pode gerar custos e respeita cotas persistentes. As decisões de tarefa e ações MCP
+continuam determinísticas, mesmo quando Gemini está ligado. Consulte
+[arquitetura e segurança da rede](docs/MULTIAGENT-NETWORK-48.md) e
+[API com memória persistente e limites](docs/AGENT-MEMORY-GEMINI-49.md).
 
 ## Gemini 3.8 Live — recurso opcional (v4.3)
 
