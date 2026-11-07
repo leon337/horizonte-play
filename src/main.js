@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { createWorld } from './world.js';
 import { createGraphics } from './graphics.js';
 import { createAvatar } from './avatar.js';
+import { createNPC } from './npc.js';
 import { createPlayground } from './playground.js';
 import { createBuildingSystem, BLOCK_COLORS } from './building.js';
 import { heightAt, insideWorld, distanceToLake, LAKE, LAKE_LEVEL, SWIM_SURFACE_OFFSET, isSwimmingAt, clampSwimFeet, isFullySubmerged } from './terrain.js';
@@ -31,6 +32,8 @@ const scenery = createPlayground(scene);
 world.colliders.push(...scenery.colliders);
 const avatar = createAvatar(scene);
 const builder = createBuildingSystem(scene, world.colliders);
+const npc = createNPC(scene, world.colliders, builder.colliders);
+world.colliders.push(npc.collider);
 // Ondas ao redor do personagem quando ele está nadando.
 const swimmingRipple = new THREE.Mesh(
   new THREE.RingGeometry(0.65, 1.08, 48),
@@ -72,6 +75,8 @@ let lastInfoTime = 0;
 let selectedColor = 0;
 let pointer = null;
 let toastTimer = null;
+let dialogueOpen = false;
+let lastNpcUIUpdate = 0;
 const pressed = new Set();
 const $ = id => document.querySelector('#' + id);
 
@@ -88,6 +93,8 @@ function updateUI() {
   menu.hidden = mode !== 'overview';
   pausePanel.hidden = mode !== 'play' || !paused;
   hud.hidden = mode !== 'play';
+  $('npc-panel').hidden = mode !== 'play';
+  if (dialogueOpen && (mode !== 'play' || paused)) closeNpcChat();
   $('overview-btn').hidden = mode !== 'play';
   $('reset-btn').hidden = mode !== 'play';
   $('build-controls').hidden = mode !== 'play';
@@ -208,7 +215,7 @@ function canMoveTo(x, z) {
   return true;
 }
 function movePlayer(dt) {
-  if (mode !== 'play' || paused) return;
+  if (mode !== 'play' || paused || dialogueOpen) return;
   let lateral = 0, forward = 0;
   if (pressed.has('w') || pressed.has('arrowup')) forward += 1;
   if (pressed.has('s') || pressed.has('arrowdown')) forward -= 1;
@@ -282,14 +289,17 @@ function movePlayer(dt) {
   }
 }
 function placeBlock() {
-  if (mode !== 'play' || paused) return;
+  if (mode !== 'play' || paused || dialogueOpen) return;
   const ok = builder.placeInFront(player, player.rotation, selectedColor);
+  if (ok) npc.onWorldChanged();
   notify(ok ? 'Bloco colocado!' : 'Não há espaço para construir aqui');
   info();
 }
 function undoBlock() {
-  if (mode !== 'play' || paused) return;
-  notify(builder.removeLast() ? 'Último bloco removido' : 'Nenhum bloco para remover');
+  if (mode !== 'play' || paused || dialogueOpen) return;
+  const removed = builder.removeLast();
+  if (removed) npc.onWorldChanged();
+  notify(removed ? 'Último bloco removido' : 'Nenhum bloco para remover');
   info();
 }
 function selectColor(value) {
@@ -299,6 +309,73 @@ function selectColor(value) {
   });
   $('color-label').textContent = BLOCK_COLORS[value].label;
 }
+
+function refreshNpcUI() {
+  const state = npc.getSnapshot(player);
+  $('npc-status').textContent = state.phase === 'acting' ?
+    state.activity + '...' : state.activity;
+  $('npc-food').value = Math.round(state.needs.food);
+  $('npc-energy').value = Math.round(state.needs.energy);
+  $('npc-social').value = Math.round(state.needs.social);
+  $('npc-curiosity').value = Math.round(state.needs.curiosity);
+  $('npc-time').textContent = state.time + ' · Vale Verde';
+  $('npc-distance').textContent = state.near ? 'Perto de você' : 'Aproxime-se';
+  const talkButton = $('npc-talk-btn');
+  talkButton.disabled = !state.near || mode !== 'play' || paused;
+  talkButton.title = state.near ? 'Conversar com Nina (F)' : 'Chegue perto de Nina para conversar';
+}
+function addNpcMessage(author, content) {
+  const item = document.createElement('p');
+  item.className = author === 'npc' ? 'npc-message npc-says' : 'npc-message player-says';
+  const name = document.createElement('strong');
+  name.textContent = author === 'npc' ? 'NINA' : 'VOCÊ';
+  const body = document.createElement('span');
+  body.textContent = String(content).slice(0, 500);
+  item.append(name, body);
+  const history = $('npc-chat-history');
+  history.appendChild(item);
+  while (history.childElementCount > 24) history.firstElementChild.remove();
+  history.scrollTop = history.scrollHeight;
+}
+function openNpcChat() {
+  if (dialogueOpen || mode !== 'play' || paused) return;
+  if (!npc.startConversation(player)) {
+    notify('Chegue perto de Nina para conversar.');
+    return;
+  }
+  dialogueOpen = true;
+  pressed.clear();
+  $('npc-chat-history').replaceChildren();
+  $('npc-chat').hidden = false;
+  const memory = npc.getSnapshot(player).rememberedName;
+  addNpcMessage('npc', memory ?
+    'Que bom te ver de novo, ' + memory + '! Como posso ajudar?' :
+    'Oi! Eu sou a Nina. Você pode perguntar sobre minhas atividades ou me pedir para seguir você.');
+  $('npc-chat-input').value = '';
+  $('npc-chat-input').focus();
+}
+function closeNpcChat() {
+  if (!dialogueOpen) return;
+  dialogueOpen = false;
+  npc.endConversation();
+  $('npc-chat').hidden = true;
+  pressed.clear();
+  if (mode === 'play' && !paused) viewport.focus();
+}
+$('npc-talk-btn').addEventListener('click', openNpcChat);
+$('npc-chat-close').addEventListener('click', closeNpcChat);
+$('npc-chat-form').addEventListener('submit', event => {
+  event.preventDefault();
+  if (!dialogueOpen) return;
+  const input = $('npc-chat-input');
+  const message = input.value.trim().slice(0, 140);
+  if (!message) return;
+  addNpcMessage('player', message);
+  addNpcMessage('npc', npc.say(message, player));
+  input.value = '';
+  refreshNpcUI();
+  input.focus();
+});
 
 $('start-btn').addEventListener('click', startPlaying);
 $('resume-btn').addEventListener('click', () => {
@@ -318,6 +395,18 @@ selectColor(0);
 
 document.addEventListener('keydown', event => {
   const key = event.key.toLowerCase();
+  if (dialogueOpen) {
+    if (key === 'escape') {
+      event.preventDefault();
+      closeNpcChat();
+    }
+    return;
+  }
+  if (key === 'f' && mode === 'play' && !paused) {
+    event.preventDefault();
+    openNpcChat();
+    return;
+  }
   if (mode === 'play' && ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' ', 'control'].includes(key)) {
     event.preventDefault();
   }
@@ -374,6 +463,7 @@ renderer.domElement.addEventListener('wheel', event => {
 
 // Diagnóstico de desenvolvimento: somente leitura, não altera o estado do jogo.
 if (import.meta.env.DEV) {
+  window.__horizonteNPC = () => npc.getSnapshot(player);
   window.__horizonteMotion = () => ({
     swimming: player.swimming,
     playerPosition: { x: player.x, z: player.z },
@@ -392,6 +482,11 @@ function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
   elapsed += dt;
   world.update(elapsed, dt, camera);
+  npc.update(dt, elapsed, player, dialogueOpen || (mode === 'play' && paused));
+  if (elapsed - lastNpcUIUpdate > 0.22) {
+    lastNpcUIUpdate = elapsed;
+    refreshNpcUI();
+  }
   if (mode === 'overview') orbit.update();
   else {
     movePlayer(dt);

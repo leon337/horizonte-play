@@ -80,3 +80,71 @@ kbd{font-family:inherit;font-size:9px;font-weight:900;border:1px solid #bdc9dd;b
 .graphics-status{position:absolute;top:76px;right:0;background:#eff5ffe6;box-shadow:0 5px 18px #21426720;border:1px solid #ffffff;color:#526681;font-size:9px;font-weight:800;border-radius:8px;padding:6px 11px;pointer-events:none}
 @media(max-width:850px){.top-right{gap:6px}.graphics-choice{padding-left:5px}.graphics-choice>span{display:none}.graphics-status{display:none}.fps-counter{display:none}}
 @media(max-width:600px){.top-right{padding:5px 7px}.top-right .live-dot{display:none}.top-right #view-label{display:none}.graphics-choice select{min-width:75px;max-width:95px;font-size:10px;padding:6px 3px}.graphics-choice{border-left:0}}
+
+/* Horizonte Living — HUD e diálogo do primeiro NPC. */
+.npc-panel{position:absolute;bottom:123px;left:3.4%;width:258px;padding:14px 15px;
+ background:#fcfdf4f2;border:2px solid #fff;border-radius:17px;
+ box-shadow:0 7px 0 #31586d39,0 14px 28px #2e516135;color:#314665;
+ pointer-events:auto}
+.npc-panel-header{display:flex;align-items:center;gap:10px}
+.npc-portrait,.npc-chat-portrait{width:37px;height:37px;flex-shrink:0;border-radius:11px;
+ display:grid;place-items:center;background:linear-gradient(135deg,#ffba75,#ffd6b1);
+ color:#5a4574;font-size:21px;font-weight:950}
+.npc-panel-header strong{font-size:13px;font-weight:950;letter-spacing:.08em;display:block}
+.npc-panel-header small{font-size:8px;letter-spacing:.08em;color:#8190a7;font-weight:800;display:block;margin-top:3px}
+.npc-online{font-size:8px;color:#21794a;background:#ddf9e6;border-radius:6px;padding:5px 6px;font-weight:900;margin-left:auto}
+.npc-status{margin-top:12px;background:#e8f2ff;color:#5674a2;border-radius:8px;
+ padding:10px;font-size:11px;font-weight:800;min-height:34px}
+.npc-bars{display:grid;gap:7px;margin-top:12px}
+.npc-bars span{display:flex;align-items:center;gap:8px;font-size:12px}
+.npc-bars progress{flex:1;width:100%;height:8px;appearance:none;overflow:hidden;border:0;border-radius:999px;background:#e2e8f1}
+.npc-bars progress::-webkit-progress-bar{background:#e2e8f1;border-radius:999px}
+#npc-food::-webkit-progress-value{background:#f1aa76;border-radius:999px}
+#npc-energy::-webkit-progress-value{background:#65b6b9;border-radius:999px}
+#npc-social::-webkit-progress-value{background:#a18de7;border-radius:999px}
+#npc-food::-moz-progress-bar{background:#f1aa76}
+#npc-energy::-moz-progress-bar{background:#65b6b9}
+#npc-social::-moz-progress-bar{background:#a18de7}
+.npc-needs-footer{display:flex;justify-content:space-between;gap:8px;margin:12px 0;
+ font-size:9px;color:#7c8ba5;font-weight:800}
+#npc-talk-btn{display:flex;justify-content:space-between;align-items:center;width:100%;
+ border:none;background:#5b65df;color:white;font-size:11px;font-weight:900;
+ border-radius:10px;padding:10px 12px;cursor:pointer}
+#npc-talk-btn:disabled{background:#d5ddeb;color:#8e9cb0;cursor:not-allowed}
+#npc-talk-btn:focus-visible,.npc-chat button:focus-visible,.npc-chat input:focus-visible{outline:3px solid #6b5bec;outline-offset:2px}
+#npc-talk-btn kbd{color:inherit;background:#ffffff21;border-color:#ffffff65}
+.npc-chat{position:absolute;z-index:5;right:3.4%;bottom:110px;width:min(388px,93vw);
+ background:#fffdf5;border:3px solid #fff;border-radius:20px;overflow:hidden;
+ box-shadow:0 12px 0 #3753714d,0 24px 80px #203a4e66;color:#2c4266}
+.npc-chat-header{display:flex;align-items:center;gap:10px;padding:15px;border-bottom:1px solid #e4e8ed;background:#fffaf0}
+.npc-chat-header strong{display:block;font-size:13px;font-weight:950}
+.npc-chat-header small{font-size:10px;color:#8b94a9;display:block;margin-top:3px}
+.npc-chat-header button{margin-left:auto;border:0;border-radius:8px;background:#ebedf5;color:#59657c;
+ width:32px;height:32px;font-size:15px;font-weight:900;cursor:pointer}
+.npc-chat-history{display:flex;flex-direction:column;gap:10px;padding:17px;max-height:265px;
+ min-height:138px;overflow-y:auto;scrollbar-width:thin;background:#fffefa}
+.npc-message{display:flex;flex-direction:column;gap:5px;margin:0;max-width:89%;font-size:12px;line-height:1.5;
+ padding:10px 13px;border-radius:11px;overflow-wrap:anywhere}
+.npc-message strong{font-size:9px;letter-spacing:.11em;font-weight:950}
+.npc-message.npc-says{align-self:flex-start;background:#f0eaff;color:#52497c}
+.npc-message.player-says{align-self:flex-end;background:#dfedff;color:#345781}
+#npc-chat-form{display:flex;gap:7px;padding:12px 14px 7px;background:#fff}
+#npc-chat-input{min-width:0;flex:1;border:1px solid #cbd7eb;background:#f6f8fe;border-radius:10px;
+ padding:12px;font:500 12px system-ui;color:#243b61}
+#npc-chat-send{border:0;background:#675af2;color:#fff;border-radius:9px;padding:10px 13px;
+ font-size:11px;font-weight:900;cursor:pointer}
+.npc-chat-help{padding:0 14px 13px;margin:0;background:#fff;font-size:10px;line-height:1.55;color:#7c879e}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:950px){.npc-panel{left:2%;width:218px;bottom:112px;padding:10px}.npc-chat{right:2%;width:min(350px,90vw)}}
+@media(max-width:650px){.npc-panel{left:3%;bottom:133px;width:173px;padding:8px;border-radius:12px}
+.npc-portrait{width:29px;height:29px;font-size:17px}.npc-panel-header{gap:5px}
+.npc-panel-header strong{font-size:11px}.npc-panel-header small,.npc-online{font-size:7px}
+.npc-status{font-size:9px;margin-top:8px;padding:7px;min-height:23px}
+.npc-bars{gap:4px;margin-top:6px}.npc-bars span{font-size:10px}
+.npc-needs-footer{margin:7px 0;font-size:8px}.npc-needs-footer span:first-child{display:none}
+#npc-talk-btn{padding:7px 8px;font-size:9px}
+.npc-chat{right:3%;bottom:107px;width:94vw}.npc-chat-history{max-height:190px}
+}
+
+#npc-curiosity::-webkit-progress-value{background:#91aee3;border-radius:999px}
+#npc-curiosity::-moz-progress-bar{background:#91aee3}

@@ -1,4 +1,4 @@
-# Horizonte Play 4.1
+# Horizonte Play 4.2 — Horizonte Living
 
 **Um jogo sandbox 3D original, explorável no navegador**, construído com [Three.js](https://threejs.org/) e [Vite](https://vite.dev/).
 
@@ -13,6 +13,7 @@
 - 🧱 Sistema simples de construção com três cores de blocos e salvamento local.
 - 🎮 Perfis gráficos **Equilibrado**, **Alto** e **Ultra**, com contador de FPS.
 - 🐟 Peixes, bolhas, plantas subaquáticas, casas e construções decorativas.
+- 🧠 **Nina, primeira moradora autônoma:** explora, come, descansa, conversa em português e pode seguir você; inteligência local sem API paga.
 
 ## Executar localmente
 
@@ -41,6 +42,9 @@ Abra o endereço exibido pelo Vite (por padrão, [http://127.0.0.1:5173/](http:/
 | Pausar | Esc |
 | Visão aérea | V |
 | Reiniciar posição | R |
+| Conversar com Nina (perto dela) | F |
+
+Na conversa, experimente **“me chamo Ana”**, **“o que você está fazendo?”**, **“me siga”** e **“pare de me seguir”**. Nina salva somente seu nome escolhido e alguns metadados locais no navegador.
 
 No lago, o personagem anda pela margem rasa e muda para a animação de natação ao entrar em água suficientemente profunda.
 
@@ -66,9 +70,15 @@ npm run preview
 | `src/building.js` | Construção e salvamento local |
 | `src/graphics.js` | Qualidade gráfica, FPS e pós-processamento |
 | `tests/` | Testes automatizados |
+| `src/npc.js` | Coordenação da moradora Nina |
+| `src/npc-brain.js` | Necessidades, decisões, memória e respostas locais |
+| `src/npc-navigation.js` | Navegação em grade A* com obstáculos |
+| `src/npc-character.js` | Corpo 3D, animações e identificação do NPC |
+
+Veja também a [especificação do MVP da Nina](docs/NPC-MVP.md).
 
 ## Estado do projeto
 
-Versão experimental **4.1**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
+Versão experimental **4.2**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
 
 **Observação:** o repositório contém apenas o código-fonte, os testes e uma imagem de apresentação. Backups, dependências, builds locais e capturas de teste ficam fora do Git.

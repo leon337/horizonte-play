@@ -57,6 +57,24 @@
     <div class="position">POSIÇÃO <span id="coords">0, 6</span></div>
     <div class="depth-panel" id="depth-panel" hidden>🌊 PROFUNDIDADE <strong id="depth-readout">0.0 m</strong></div>
 
+    <section id="npc-panel" class="npc-panel" aria-label="Moradora inteligente">
+      <div class="npc-panel-header"><span class="npc-portrait">N</span>
+        <div><strong>NINA</strong><small>MORADORA AUTÔNOMA</small></div>
+        <span class="npc-online">ATIVA</span></div>
+      <div id="npc-status" class="npc-status">Explorando o vale</div>
+      <div class="npc-bars">
+        <span title="Saciedade">🍎 <progress id="npc-food" max="100" value="69"></progress></span>
+        <span title="Energia">⚡ <progress id="npc-energy" max="100" value="73"></progress></span>
+        <span title="Sociabilidade">💬 <progress id="npc-social" max="100" value="63"></progress></span>
+        <span title="Curiosidade">🧭 <progress id="npc-curiosity" max="100" value="36"></progress></span>
+      </div>
+      <div class="npc-needs-footer">
+        <span id="npc-time">08:00 · Vale Verde</span>
+        <span id="npc-distance">Aproxime-se</span>
+      </div>
+      <button id="npc-talk-btn" type="button" disabled>Conversar com Nina <kbd>F</kbd></button>
+    </section>
+
     <div id="build-controls" class="build-panel">
       <div class="panel-header"><span>🧱 CONSTRUIR</span><small id="block-count">0 / 90</small></div>
       <p>Escolha uma cor e coloque blocos no caminho.</p>
@@ -80,12 +98,26 @@
       <span><kbd>ESC</kbd> PAUSAR</span>
     </div>
   </div>
+  <section id="npc-chat" class="npc-chat" role="dialog" aria-label="Conversa com Nina" hidden>
+    <div class="npc-chat-header">
+      <div class="npc-chat-portrait">N</div>
+      <div><strong>Nina, moradora do Horizonte</strong><small>Diálogo local com memória</small></div>
+      <button id="npc-chat-close" type="button" aria-label="Fechar conversa">✕</button>
+    </div>
+    <div id="npc-chat-history" class="npc-chat-history" aria-live="polite"></div>
+    <form id="npc-chat-form" autocomplete="off">
+      <label for="npc-chat-input" class="sr-only">Escreva para Nina</label>
+      <input id="npc-chat-input" type="text" maxlength="140" placeholder="Pergunte algo para Nina..." required>
+      <button id="npc-chat-send" type="submit">Enviar</button>
+    </form>
+    <p class="npc-chat-help">Experimente: "me chamo Ana", "o que você faz?" ou "me siga".</p>
+  </section>
   <div class="side-actions">
     <button id="overview-btn" type="button" hidden>◫ Visão aérea <kbd>V</kbd></button>
     <button id="reset-btn" type="button" hidden>↺ Renascer <kbd>R</kbd></button>
   </div>
   <div id="toast" role="status" class="toast" hidden></div>
-  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> ULTRA 4.1</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
+  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> LIVING 4.2</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
   <div id="error" hidden role="alert">Este navegador não conseguiu iniciar o mundo 3D. Verifique o WebGL e a aceleração gráfica.</div>
 </div>
 <script type="module" src="/src/main.js"></script>
