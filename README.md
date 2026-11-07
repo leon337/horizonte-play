@@ -1,4 +1,4 @@
-# Horizonte Play 4.6 — Atendimento inteligente e compra rápida
+# Horizonte Play 4.7 — Alex NPC 3D vivo e Comércio MCP
 
 **Um jogo sandbox 3D original, explorável no navegador**, construído com [Three.js](https://threejs.org/) e [Vite](https://vite.dev/).
 
@@ -15,7 +15,8 @@
 - 🐟 Peixes, bolhas, plantas subaquáticas, casas e construções decorativas.
 - 🧠 **Nina, primeira moradora autônoma:** explora, come, descansa, conversa em português e pode seguir você; inteligência local sem API paga.
 - 🏪 **Horizonte Commerce:** construa cafeterias 3D com servidor MCP central, produtos, estoque e pedidos fictícios.
-- 💬 **Alex, atendente inteligente (4.5):** conversa em português, consulta estoque e prepara pedidos por MCP. Compra só após confirmação do jogador; Gemini textual opcional.
+- 💬 **Alex, atendente inteligente:** conversa em português, consulta estoque e prepara pedidos por MCP. Compra só após confirmação do jogador; Gemini textual opcional.
+- 🤖 **Alex NPC 3D (4.7):** atendente animado em cada cafeteria, com rotina interna, saudações, gestos e reações à presença de Nina; sem custos de IA nessas animações.
 
 ## Executar localmente
 
@@ -83,7 +84,7 @@ Veja também a [especificação do MVP da Nina](docs/NPC-MVP.md).
 
 ## Estado do projeto
 
-Versão experimental **4.6**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
+Versão experimental **4.7**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
 
 **Observação:** o repositório contém apenas o código-fonte, os testes e uma imagem de apresentação. Backups, dependências, builds locais e capturas de teste ficam fora do Git.
 
@@ -99,7 +100,8 @@ A opção Gemini para interpretação de texto fica desligada por padrão e **po
 O modelo textual do atendente é `gemini-2.5-flash`, distinto do modelo Live da Nina.
 Sem Gemini, o atendente usa regras locais gratuitas.
 
-Veja [arquitetura, limites, riscos e testes do Atendente Alex](docs/ATENDENTE-IA-MCP.md).
+Veja [arquitetura, limites, riscos e testes do Atendente Alex](docs/ATENDENTE-IA-MCP.md)
+e [plano técnico e critérios do NPC 3D](docs/ATENDENTE-NPC-47.md).
 
 ## Gemini 3.8 Live — recurso opcional (v4.3)
 

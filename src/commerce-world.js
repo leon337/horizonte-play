@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { heightAt } from './terrain.js';
+import { createAttendantBrain } from './commerce-attendant-brain.js';
+import { createAttendantCharacter } from './commerce-attendant-character.js';
 
 const material = color => new THREE.MeshStandardMaterial({
   color, roughness: 0.82, metalness: 0.015, flatShading: true
@@ -72,17 +74,9 @@ function makeShop(scene, shop) {
     group.add(roll);
   }
 
-  // Atendente do MVP: boneco cenográfico com tarefas digitais via MCP.
-  const worker = new THREE.Group();
-  worker.position.set(0.62, 0, 0.15);
-  cube(worker, '#4f9f9e', 0.69, 1.10, 0.49, 0, 1.57, 0);
-  cube(worker, '#d3c390', 0.60, 0.60, 0.55, 0, 2.45, 0);
-  cube(worker, '#674b78', 0.72, 0.24, 0.65, 0, 2.80, 0);
-  cube(worker, '#53687b', 0.28, 0.9, 0.35, -0.18, 0.53, 0);
-  cube(worker, '#53687b', 0.28, 0.9, 0.35, 0.18, 0.53, 0);
-  const workerArm = cube(worker, '#d3c390', 0.22, 0.81, 0.29, 0.57, 1.58, 0.0);
-  cube(worker, '#d3c390', 0.22, 0.81, 0.29, -0.57, 1.58, 0);
-  group.add(worker);
+  // Alex vive no espaço interno do balcão. Cérebro local ≠ servidor de vendas.
+  const brain = createAttendantBrain(shop);
+  const character = createAttendantCharacter(group, shop.id);
 
   const label = new THREE.Sprite(new THREE.SpriteMaterial({
     map: signTexture(shop.name), transparent: true, depthWrite: false
@@ -102,28 +96,45 @@ function makeShop(scene, shop) {
 
   const collider = { x: shop.x, z: shop.z, radius: 3.7 };
   return {
-    shop, group, collider, workerArm, ring,
-    update(time, near) {
-      workerArm.rotation.z = Math.sin(time * 2.7) * 0.16;
-      ring.visible = near;
+    shop, group, collider,
+    event: action => brain.event(action),
+    getSnapshot() {
+      const s = brain.getSnapshot();
+      return { ...s, worldX: shop.x + s.x, worldZ: shop.z + s.z };
+    },
+    update(time, dt, player, nina, interacting) {
+      const s = brain.update(dt, { player, nina, interacting });
+      const attention = s.nearPlayer || s.nearNina || interacting;
+      character.update(s, time, attention);
+      ring.visible = s.nearPlayer;
       ring.material.opacity = 0.42 + Math.sin(time * 3) * 0.16;
     }
   };
 }
 export function createCommerceWorld(scene, obstacles) {
   const shops = new Map();
+  let previousTime = null;
   function add(shop) {
     if (!shop || shops.has(shop.id)) return;
     const display = makeShop(scene, shop);
     shops.set(shop.id, display);
     obstacles.push(display.collider);
   }
-  function update(time, player) {
+  function update(time, player, nina = null, interactingShop = null) {
+    const dt = previousTime === null ? 0 : Math.max(0, Math.min(0.15, time - previousTime));
+    previousTime = time;
     for (const display of shops.values()) {
-      const near = Math.hypot(display.shop.x - player.x,
-        display.shop.z - player.z) < 8;
-      display.update(time, near);
+      display.update(time, dt, player, nina, display.shop.id === interactingShop);
     }
+  }
+  function attendantEvent(shopId, action) {
+    return shops.get(shopId)?.event(action) || false;
+  }
+  function attendantSnapshot(shopId) {
+    return shops.get(shopId)?.getSnapshot() || null;
+  }
+  function attendantSnapshots() {
+    return [...shops.values()].map(display => display.getSnapshot());
   }
   function nearby(player, maxDistance = 7.7) {
     let best = null;
@@ -175,6 +186,7 @@ export function createCommerceWorld(scene, obstacles) {
     return 0;
   }
   return { add, update, nearby, restrictCamera,
+    attendantEvent, attendantSnapshot, attendantSnapshots,
     get count() { return shops.size; },
     has: id => shops.has(id) };
 }
