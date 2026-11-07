@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#59bbf3">
+  <meta name="description" content="Horizonte: um mundo sandbox 3D original para explorar e construir.">
+  <title>Horizonte Play | Mundo Criativo 3D</title>
+</head>
+<body>
+<div id="app">
+  <div id="viewport" tabindex="0" aria-label="Ambiente interativo do Horizonte Play"></div>
+  <div id="underwater-overlay" aria-hidden="true"></div>
+  <header class="topbar">
+    <div class="brand"><span class="brand-icon">✦</span><span>HORIZONTE <b>PLAY</b></span></div>
+    <div class="top-right">
+      <span class="pill">🌈 MUNDO CRIATIVO</span>
+      <span class="live-dot"></span><span id="view-label">VISÃO DO MUNDO</span>
+      <label class="graphics-choice" for="graphics-quality">
+        <span>GRÁFICOS</span>
+        <select id="graphics-quality" aria-label="Qualidade gráfica">
+          <option value="equilibrado">Equilibrado</option>
+          <option value="alto">Alto</option>
+          <option value="ultra" selected>Ultra</option>
+        </select>
+      </label>
+      <span id="graphics-fps" class="fps-counter">-- FPS</span>
+    </div>
+    <span id="graphics-status" class="graphics-status">Ultra</span>
+  </header>
+
+  <main id="menu" class="intro">
+    <span class="category"><span class="star">✦</span> SEU MUNDO, SUAS REGRAS</span>
+    <h1>Explore.<br>Crie.<br><em>Divirta-se!</em></h1>
+    <p>Um universo de blocos com seu próprio estilo. Ande pelo vale, descubra lugares e construa com as suas cores.</p>
+    <button id="start-btn" class="play-button" type="button">Entrar no mundo ↗</button>
+    <div class="menu-stats">
+      <span><strong>01</strong> EXPLORAR</span><span><strong>02</strong> PULAR</span><span><strong>03</strong> CONSTRUIR</span>
+    </div>
+  </main>
+
+  <section id="pause-panel" class="pause-card" hidden>
+    <span class="category">JOGO PAUSADO</span>
+    <h2>Uma pausa na aventura</h2>
+    <p>Seu mundo continua esperando você.</p>
+    <button id="resume-btn" class="play-button" type="button">Continuar jogando ↗</button>
+    <button id="pause-overview-btn" class="secondary-action" type="button">Voltar à visão aérea</button>
+  </section>
+
+  <div id="hud" hidden>
+    <section class="player-card">
+      <div class="avatar-icon">☺</div>
+      <div><strong>EXPLORADOR</strong><small>HORIZONTE PLAY</small></div>
+      <span class="level">LVL 01</span>
+    </section>
+    <div class="mission"><span class="mission-icon">◇</span><div><small>MISSÃO LIVRE</small><strong id="mission">Explore o lago</strong></div></div>
+    <div class="position">POSIÇÃO <span id="coords">0, 6</span></div>
+    <div class="depth-panel" id="depth-panel" hidden>🌊 PROFUNDIDADE <strong id="depth-readout">0.0 m</strong></div>
+
+    <div id="build-controls" class="build-panel">
+      <div class="panel-header"><span>🧱 CONSTRUIR</span><small id="block-count">0 / 90</small></div>
+      <p>Escolha uma cor e coloque blocos no caminho.</p>
+      <div class="swatches">
+        <button type="button" class="swatch coral" data-color="0" aria-label="Coral, tecla 1" aria-pressed="true"><span>1</span></button>
+        <button type="button" class="swatch azure" data-color="1" aria-label="Azul, tecla 2" aria-pressed="false"><span>2</span></button>
+        <button type="button" class="swatch lemon" data-color="2" aria-label="Amarelo, tecla 3" aria-pressed="false"><span>3</span></button>
+        <strong id="color-label">Coral</strong>
+      </div>
+      <div class="build-actions">
+        <button id="build-btn" type="button">＋ Colocar <kbd>E</kbd></button>
+        <button id="undo-btn" type="button">↶ Desfazer <kbd>Q</kbd></button>
+      </div>
+    </div>
+    <div class="controls-strip">
+      <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVER</span>
+      <span><kbd>ESPAÇO</kbd> PULAR / SUBIR</span>
+      <span><kbd>C</kbd> / <kbd>CTRL</kbd> MERGULHAR</span>
+      <span><kbd>SHIFT</kbd> CORRER</span>
+      <span>🖱 ARRASTAR PARA GIRAR</span>
+      <span><kbd>ESC</kbd> PAUSAR</span>
+    </div>
+  </div>
+  <div class="side-actions">
+    <button id="overview-btn" type="button" hidden>◫ Visão aérea <kbd>V</kbd></button>
+    <button id="reset-btn" type="button" hidden>↺ Renascer <kbd>R</kbd></button>
+  </div>
+  <div id="toast" role="status" class="toast" hidden></div>
+  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> ULTRA 4.1</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
+  <div id="error" hidden role="alert">Este navegador não conseguiu iniciar o mundo 3D. Verifique o WebGL e a aceleração gráfica.</div>
+</div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
