@@ -4,6 +4,7 @@ import { createWorld } from './world.js';
 import { createGraphics } from './graphics.js';
 import { createAvatar } from './avatar.js';
 import { createNPC } from './npc.js';
+import { createGeminiLive } from './npc-live.js';
 import { createPlayground } from './playground.js';
 import { createBuildingSystem, BLOCK_COLORS } from './building.js';
 import { heightAt, insideWorld, distanceToLake, LAKE, LAKE_LEVEL, SWIM_SURFACE_OFFSET, isSwimmingAt, clampSwimFeet, isFullySubmerged } from './terrain.js';
@@ -88,6 +89,35 @@ const coords = $('coords');
 const mission = $('mission');
 const count = $('block-count');
 const toast = $('toast');
+let liveCaption = null;
+const geminiLive = createGeminiLive({
+  onState: state => {
+    const connect = $('npc-live-connect');
+    connect.textContent = state.connected ? '⏹ Desconectar Gemini' : '✨ Conectar Gemini 3.8 Live';
+    connect.disabled = /Conectando/.test(state.status);
+    $('npc-live-mic').disabled = !state.connected;
+    $('npc-live-mic').textContent = state.microphone ? '🔴 Desligar microfone' : '🎤 Microfone';
+    $('npc-live-status').textContent = state.status;
+    if (state.status === 'Gemini Live conectado') liveCaption = null;
+  },
+  onText: text => {
+    if (!dialogueOpen || !text.trim()) return;
+    if (!liveCaption) {
+      addNpcMessage('npc', '');
+      liveCaption = $('npc-chat-history').lastElementChild.querySelector('span');
+    }
+    liveCaption.textContent += text;
+    const history = $('npc-chat-history');
+    history.scrollTop = history.scrollHeight;
+  },
+  onUserTranscript: text => {
+    if (dialogueOpen && text.trim()) addNpcMessage('player', text);
+  },
+  onError: message => {
+    if (dialogueOpen) addNpcMessage('npc', 'Gemini Live: ' + message);
+    else notify(message);
+  }
+});
 
 function updateUI() {
   menu.hidden = mode !== 'overview';
@@ -356,6 +386,8 @@ function openNpcChat() {
 }
 function closeNpcChat() {
   if (!dialogueOpen) return;
+  geminiLive.disconnect();
+  liveCaption = null;
   dialogueOpen = false;
   npc.endConversation();
   $('npc-chat').hidden = true;
@@ -364,6 +396,25 @@ function closeNpcChat() {
 }
 $('npc-talk-btn').addEventListener('click', openNpcChat);
 $('npc-chat-close').addEventListener('click', closeNpcChat);
+$('npc-live-connect').addEventListener('click', async () => {
+  if (!dialogueOpen) return;
+  if (geminiLive.isConnected()) {
+    geminiLive.disconnect();
+    addNpcMessage('npc', 'Voltamos ao modo local, sem API.');
+    return;
+  }
+  const state = npc.getSnapshot(player);
+  const connected = await geminiLive.connect({
+    playerName: state.rememberedName,
+    activity: state.activity
+  });
+  if (connected && dialogueOpen) {
+    addNpcMessage('npc', 'Gemini 3.8 Live conectado. Pode escrever ou ligar o microfone.');
+  }
+});
+$('npc-live-mic').addEventListener('click', async () => {
+  if (dialogueOpen) await geminiLive.toggleMicrophone();
+});
 $('npc-chat-form').addEventListener('submit', event => {
   event.preventDefault();
   if (!dialogueOpen) return;
@@ -371,7 +422,15 @@ $('npc-chat-form').addEventListener('submit', event => {
   const message = input.value.trim().slice(0, 140);
   if (!message) return;
   addNpcMessage('player', message);
-  addNpcMessage('npc', npc.say(message, player));
+  if (geminiLive.isConnected()) {
+    npc.say(message, player); // Atualiza a memória e os comandos seguros do mundo.
+    liveCaption = null;
+    if (!geminiLive.sendText(message)) {
+      addNpcMessage('npc', 'Não foi possível enviar ao Gemini. Desconecte para conversar localmente.');
+    }
+  } else {
+    addNpcMessage('npc', npc.say(message, player));
+  }
   input.value = '';
   refreshNpcUI();
   input.focus();

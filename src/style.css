@@ -148,3 +148,22 @@ kbd{font-family:inherit;font-size:9px;font-weight:900;border:1px solid #bdc9dd;b
 
 #npc-curiosity::-webkit-progress-value{background:#91aee3;border-radius:999px}
 #npc-curiosity::-moz-progress-bar{background:#91aee3}
+
+/* Gemini Live: conexão explicitamente opt-in, indicadores de áudio e custo. */
+.npc-live-controls{
+  display:flex;align-items:center;flex-wrap:wrap;gap:7px;
+  padding:10px 14px;background:#f2f6fd;border-bottom:1px solid #dae5ee;
+}
+#npc-live-connect,#npc-live-mic{
+  padding:8px 10px;border:0;border-radius:9px;cursor:pointer;
+  font-size:10px;font-weight:850;letter-spacing:.01em;
+}
+#npc-live-connect{background:#615be5;color:#fff;flex:1;min-width:140px}
+#npc-live-mic{background:#d9edff;color:#315f85}
+#npc-live-mic:disabled{opacity:.5;cursor:default}
+#npc-live-connect:disabled{opacity:.65;cursor:wait}
+#npc-live-status{display:block;flex-basis:100%;font:750 10px system-ui;color:#70829a}
+@media(max-width:600px){
+  .npc-live-controls{padding:8px 10px}
+  #npc-live-connect,#npc-live-mic{font-size:9px}
+}

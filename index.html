@@ -101,8 +101,13 @@
   <section id="npc-chat" class="npc-chat" role="dialog" aria-label="Conversa com Nina" hidden>
     <div class="npc-chat-header">
       <div class="npc-chat-portrait">N</div>
-      <div><strong>Nina, moradora do Horizonte</strong><small>Diálogo local com memória</small></div>
+      <div><strong>Nina, moradora do Horizonte</strong><small>Modo local ou Gemini 3.8 Live</small></div>
       <button id="npc-chat-close" type="button" aria-label="Fechar conversa">✕</button>
+    </div>
+    <div class="npc-live-controls">
+      <button id="npc-live-connect" type="button" title="Usa a API Gemini e pode gerar custos">✨ Conectar Gemini 3.8 Live</button>
+      <button id="npc-live-mic" type="button" disabled title="Ativar ou desligar microfone">🎤 Microfone</button>
+      <small id="npc-live-status" role="status">Modo local · sem conexão externa</small>
     </div>
     <div id="npc-chat-history" class="npc-chat-history" aria-live="polite"></div>
     <form id="npc-chat-form" autocomplete="off">
@@ -110,14 +115,14 @@
       <input id="npc-chat-input" type="text" maxlength="140" placeholder="Pergunte algo para Nina..." required>
       <button id="npc-chat-send" type="submit">Enviar</button>
     </form>
-    <p class="npc-chat-help">Experimente: "me chamo Ana", "o que você faz?" ou "me siga".</p>
+    <p class="npc-chat-help">Modo local é gratuito. Gemini Live exige chave configurada e pode gerar cobranças. O microfone só liga quando você autoriza.</p>
   </section>
   <div class="side-actions">
     <button id="overview-btn" type="button" hidden>◫ Visão aérea <kbd>V</kbd></button>
     <button id="reset-btn" type="button" hidden>↺ Renascer <kbd>R</kbd></button>
   </div>
   <div id="toast" role="status" class="toast" hidden></div>
-  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> LIVING 4.2</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
+  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> LIVING 4.3</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
   <div id="error" hidden role="alert">Este navegador não conseguiu iniciar o mundo 3D. Verifique o WebGL e a aceleração gráfica.</div>
 </div>
 <script type="module" src="/src/main.js"></script>

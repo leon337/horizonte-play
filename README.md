@@ -1,4 +1,4 @@
-# Horizonte Play 4.2 — Horizonte Living
+# Horizonte Play 4.3 — Horizonte Living + Gemini Live
 
 **Um jogo sandbox 3D original, explorável no navegador**, construído com [Three.js](https://threejs.org/) e [Vite](https://vite.dev/).
 
@@ -79,6 +79,58 @@ Veja também a [especificação do MVP da Nina](docs/NPC-MVP.md).
 
 ## Estado do projeto
 
-Versão experimental **4.2**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
+Versão experimental **4.3**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
 
 **Observação:** o repositório contém apenas o código-fonte, os testes e uma imagem de apresentação. Backups, dependências, builds locais e capturas de teste ficam fora do Git.
+
+## Gemini 3.8 Live — recurso opcional (v4.3)
+
+O diálogo local da Nina continua disponível sem internet ou chave. A opção
+**Conectar Gemini 3.8 Live** usa conversa em tempo real, voz sintetizada,
+transcrição, entrada por texto e microfone (ativado separadamente). Este
+recurso **pode gerar custos** na conta Google vinculada à chave. As sessões
+são iniciadas apenas com clique e encerradas após, no máximo, 5 minutos.
+
+### Configuração no computador Windows
+
+1. Copie sua **chave de API do Google AI Studio** para a área de transferência.
+2. Abra o PowerShell na pasta do projeto e execute:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\configure-gemini.ps1
+```
+
+O script valida o formato da chave e grava um arquivo criptografado DPAPI
+**fora do repositório**, em `%LOCALAPPDATA%\HorizontePlay\gemini-key.dpapi`.
+Ele não imprime a chave na tela. Somente o usuário atual do Windows pode
+descriptografar esse arquivo. Se a ponte local já estiver executando, ela
+é reiniciada para receber a configuração atualizada.
+
+3. Abra o jogo com `INICIAR-3D.bat` (ou seu atalho) e pressione F perto da
+Nina; escolha **Conectar Gemini 3.8 Live**. Você pode enviar mensagens
+escritas ou clicar **Microfone** para dar permissão de áudio.
+
+### Arquitetura e segurança
+
+- `server/gemini-local.mjs` atende somente `127.0.0.1:4174`.
+- A chave de longa duração fica apenas no serviço local, jamais no
+  JavaScript do navegador ou no GitHub.
+- Uma sessão explicitamente solicitada recebe um token efêmero de uso
+  limitado; este token abre a conexão com a API Live do Google.
+- Os dados de texto e áudio enviados no modo conectado são processados
+  pelo serviço Gemini, sujeito às condições da sua conta Google.
+- A UI e o modo local funcionam normalmente se não houver chave.
+- A conexão para em `5 minutos`, ao desconectar ou ao fechar o diálogo.
+- O servidor local é para desenvolvimento, não deve ser publicado em GitHub Pages;
+  uma implantação pública exige um backend autenticado e política de abuso.
+- A chave criptografada não entra no repositório; nunca salve chaves em
+  `.env` público ou no código fonte.
+- Modelos consultados na documentação oficial: `gemini-3.8-live` via
+  Gemini Live API. O comportamento real depende de permissões, limites
+  e faturamento da chave.
+
+Para desenvolvimento da ponte separadamente:
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-gemini.ps1
+```
+`GET http://127.0.0.1:4174/health` mostra apenas o estado configurado.
