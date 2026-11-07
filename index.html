@@ -89,12 +89,25 @@
         <button id="undo-btn" type="button">↶ Desfazer <kbd>Q</kbd></button>
       </div>
     </div>
+    <section id="commerce-hud" class="commerce-hud" aria-label="Horizonte Commerce" hidden>
+      <div class="commerce-title"><span>🏪 COMÉRCIO MCP</span><small id="commerce-count">0 / 8</small></div>
+      <div id="commerce-connection" class="commerce-connection">Conectando servidor...</div>
+      <div class="commerce-wallet">🪙 Carteira: <strong id="commerce-wallet">180 moedas</strong></div>
+      <label class="commerce-name-label" for="commerce-name">Nome do estabelecimento</label>
+      <input id="commerce-name" type="text" value="Café do Vale" maxlength="35" aria-label="Nome da cafeteria">
+      <button id="commerce-create" type="button">＋ Criar cafeteria <kbd>B</kbd></button>
+      <button id="commerce-interact" type="button" disabled>☕ Atendimento <kbd>G</kbd></button>
+      <div class="commerce-status-row"><small id="commerce-nearby">Nenhuma loja próxima</small>
+        <button id="commerce-refresh" type="button" aria-label="Atualizar conexão MCP">↻</button></div>
+    </section>
     <div class="controls-strip">
       <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVER</span>
       <span><kbd>ESPAÇO</kbd> PULAR / SUBIR</span>
       <span><kbd>C</kbd> / <kbd>CTRL</kbd> MERGULHAR</span>
       <span><kbd>SHIFT</kbd> CORRER</span>
       <span>🖱 ARRASTAR PARA GIRAR</span>
+      <span><kbd>B</kbd> CRIAR LOJA</span>
+      <span><kbd>G</kbd> ATENDIMENTO</span>
       <span><kbd>ESC</kbd> PAUSAR</span>
     </div>
   </div>
@@ -117,12 +130,34 @@
     </form>
     <p class="npc-chat-help">Modo local é gratuito. Gemini Live exige chave configurada e pode gerar cobranças. O microfone só liga quando você autoriza.</p>
   </section>
+  <section id="commerce-modal" class="commerce-modal" role="dialog" aria-label="Atendimento da cafeteria" hidden>
+    <div class="commerce-modal-header">
+      <span class="commerce-modal-icon">☕</span>
+      <div><h2 id="commerce-shop-title">Cafeteria</h2>
+        <p id="commerce-shop-stats">0 pedidos · Caixa 0 moedas</p></div>
+      <button id="commerce-close" type="button" aria-label="Fechar atendimento">✕</button>
+    </div>
+    <div class="commerce-modal-body">
+      <div class="commerce-fake-money">🪙 Economia simulada · nenhuma compra com dinheiro real</div>
+      <label for="commerce-product">Produto e estoque</label>
+      <select id="commerce-product"></select>
+      <label for="commerce-quantity">Quantidade (1 a 20)</label>
+      <input id="commerce-quantity" type="number" value="1" min="1" max="20" step="1">
+      <button id="commerce-buy" class="commerce-buy" type="button">🛍 Comprar com moedas virtuais</button>
+      <div class="commerce-other-actions">
+        <button id="commerce-nina-order" type="button">🤖 Simular pedido da Nina</button>
+        <button id="commerce-restock" type="button">📦 Repor estoque</button>
+      </div>
+      <p id="commerce-feedback" role="status">Selecione um produto.</p>
+      <small>Servidor MCP: listar estabelecimentos, estoque, pedidos e caixa.</small>
+    </div>
+  </section>
   <div class="side-actions">
     <button id="overview-btn" type="button" hidden>◫ Visão aérea <kbd>V</kbd></button>
     <button id="reset-btn" type="button" hidden>↺ Renascer <kbd>R</kbd></button>
   </div>
   <div id="toast" role="status" class="toast" hidden></div>
-  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> LIVING 4.3</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
+  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> COMMERCE 4.4</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
   <div id="error" hidden role="alert">Este navegador não conseguiu iniciar o mundo 3D. Verifique o WebGL e a aceleração gráfica.</div>
 </div>
 <script type="module" src="/src/main.js"></script>

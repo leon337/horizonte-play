@@ -4,6 +4,7 @@ import { createWorld } from './world.js';
 import { createGraphics } from './graphics.js';
 import { createAvatar } from './avatar.js';
 import { createNPC } from './npc.js';
+import { createCommerceExperience } from './commerce-client.js';
 import { createGeminiLive } from './npc-live.js';
 import { createPlayground } from './playground.js';
 import { createBuildingSystem, BLOCK_COLORS } from './building.js';
@@ -119,6 +120,12 @@ const geminiLive = createGeminiLive({
   }
 });
 
+const commerce = createCommerceExperience({
+  scene, world, builder, npc, player, notify,
+  canAct: () => mode === 'play' && !paused && !dialogueOpen,
+  restoreFocus: () => viewport.focus()
+});
+
 function updateUI() {
   menu.hidden = mode !== 'overview';
   pausePanel.hidden = mode !== 'play' || !paused;
@@ -186,7 +193,9 @@ function followCamera(dt, instant = false) {
     desired.y = Math.min(desired.y, LAKE_LEVEL - 0.58);
     desired.y = Math.max(desired.y, heightAt(desired.x, desired.z) + 0.45);
   }
-  const blend = instant ? 1 : 1 - Math.exp(-dt * 9);
+  const adjusted = mode === 'play' ? commerce.restrictCamera(target, desired) : 0;
+  if (adjusted) cameraYaw += adjusted;
+  const blend = instant || adjusted ? 1 : 1 - Math.exp(-dt * 9);
   camera.position.lerp(desired, blend);
   camera.lookAt(target);
 }
@@ -245,7 +254,7 @@ function canMoveTo(x, z) {
   return true;
 }
 function movePlayer(dt) {
-  if (mode !== 'play' || paused || dialogueOpen) return;
+  if (mode !== 'play' || paused || dialogueOpen || commerce.isModalOpen()) return;
   let lateral = 0, forward = 0;
   if (pressed.has('w') || pressed.has('arrowup')) forward += 1;
   if (pressed.has('s') || pressed.has('arrowdown')) forward -= 1;
@@ -319,14 +328,14 @@ function movePlayer(dt) {
   }
 }
 function placeBlock() {
-  if (mode !== 'play' || paused || dialogueOpen) return;
+  if (mode !== 'play' || paused || dialogueOpen || commerce.isModalOpen()) return;
   const ok = builder.placeInFront(player, player.rotation, selectedColor);
   if (ok) npc.onWorldChanged();
   notify(ok ? 'Bloco colocado!' : 'Não há espaço para construir aqui');
   info();
 }
 function undoBlock() {
-  if (mode !== 'play' || paused || dialogueOpen) return;
+  if (mode !== 'play' || paused || dialogueOpen || commerce.isModalOpen()) return;
   const removed = builder.removeLast();
   if (removed) npc.onWorldChanged();
   notify(removed ? 'Último bloco removido' : 'Nenhum bloco para remover');
@@ -351,7 +360,7 @@ function refreshNpcUI() {
   $('npc-time').textContent = state.time + ' · Vale Verde';
   $('npc-distance').textContent = state.near ? 'Perto de você' : 'Aproxime-se';
   const talkButton = $('npc-talk-btn');
-  talkButton.disabled = !state.near || mode !== 'play' || paused;
+  talkButton.disabled = !state.near || mode !== 'play' || paused || commerce.isModalOpen();
   talkButton.title = state.near ? 'Conversar com Nina (F)' : 'Chegue perto de Nina para conversar';
 }
 function addNpcMessage(author, content) {
@@ -368,7 +377,7 @@ function addNpcMessage(author, content) {
   history.scrollTop = history.scrollHeight;
 }
 function openNpcChat() {
-  if (dialogueOpen || mode !== 'play' || paused) return;
+  if (dialogueOpen || commerce.isModalOpen() || mode !== 'play' || paused) return;
   if (!npc.startConversation(player)) {
     notify('Chegue perto de Nina para conversar.');
     return;
@@ -461,6 +470,19 @@ document.addEventListener('keydown', event => {
     }
     return;
   }
+  if (commerce.isModalOpen()) {
+    if (key === 'escape') {
+      event.preventDefault();
+      commerce.close();
+    }
+    return;
+  }
+  // Não interpretar digitação de nome ou campos como comandos do avatar.
+  if (event.target?.closest?.('input,textarea,select')) return;
+  if (commerce.onKey(key)) {
+    event.preventDefault();
+    return;
+  }
   if (key === 'f' && mode === 'play' && !paused) {
     event.preventDefault();
     openNpcChat();
@@ -523,9 +545,11 @@ renderer.domElement.addEventListener('wheel', event => {
 // Diagnóstico de desenvolvimento: somente leitura, não altera o estado do jogo.
 if (import.meta.env.DEV) {
   window.__horizonteNPC = () => npc.getSnapshot(player);
+  window.__horizonteCommerce = () => commerce.getSnapshot();
   window.__horizonteMotion = () => ({
     swimming: player.swimming,
     playerPosition: { x: player.x, z: player.z },
+    cameraYaw,
     currentFeetY: feetY(),
     depth: player.swimming ? LAKE_LEVEL - (player.swimY + 1.55) : 0,
     motion: avatar.getMotionState()
@@ -541,7 +565,9 @@ function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
   elapsed += dt;
   world.update(elapsed, dt, camera);
-  npc.update(dt, elapsed, player, dialogueOpen || (mode === 'play' && paused));
+  npc.update(dt, elapsed, player,
+    dialogueOpen || commerce.isModalOpen() || (mode === 'play' && paused));
+  commerce.update(elapsed, mode === 'play');
   if (elapsed - lastNpcUIUpdate > 0.22) {
     lastNpcUIUpdate = elapsed;
     refreshNpcUI();

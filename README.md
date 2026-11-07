@@ -1,4 +1,4 @@
-# Horizonte Play 4.3 — Horizonte Living + Gemini Live
+# Horizonte Play 4.4 — Horizonte Commerce + Gemini Live
 
 **Um jogo sandbox 3D original, explorável no navegador**, construído com [Three.js](https://threejs.org/) e [Vite](https://vite.dev/).
 
@@ -14,6 +14,7 @@
 - 🎮 Perfis gráficos **Equilibrado**, **Alto** e **Ultra**, com contador de FPS.
 - 🐟 Peixes, bolhas, plantas subaquáticas, casas e construções decorativas.
 - 🧠 **Nina, primeira moradora autônoma:** explora, come, descansa, conversa em português e pode seguir você; inteligência local sem API paga.
+- 🏪 **Horizonte Commerce:** construa cafeterias 3D com servidor MCP central, produtos, estoque, pedidos fictícios e atendente.
 
 ## Executar localmente
 
@@ -42,6 +43,8 @@ Abra o endereço exibido pelo Vite (por padrão, [http://127.0.0.1:5173/](http:/
 | Pausar | Esc |
 | Visão aérea | V |
 | Reiniciar posição | R |
+| Criar cafeteria | B |
+| Atender na cafeteria próxima | G |
 | Conversar com Nina (perto dela) | F |
 
 Na conversa, experimente **“me chamo Ana”**, **“o que você está fazendo?”**, **“me siga”** e **“pare de me seguir”**. Nina salva somente seu nome escolhido e alguns metadados locais no navegador.
@@ -79,7 +82,7 @@ Veja também a [especificação do MVP da Nina](docs/NPC-MVP.md).
 
 ## Estado do projeto
 
-Versão experimental **4.3**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
+Versão experimental **4.4**, um jogo local para um jogador. Não há contas, multiplayer, marketplace ou servidor de jogo. A física da água e as colisões são simplificadas. É um projeto original inspirado no gênero sandbox, **sem relação oficial com Roblox**.
 
 **Observação:** o repositório contém apenas o código-fonte, os testes e uma imagem de apresentação. Backups, dependências, builds locais e capturas de teste ficam fora do Git.
 
@@ -147,3 +150,23 @@ expiração em 10 minutos. Este backend é exclusivo para uso local.
 
 **Atenção:** não publique capturas de tela que mostrem chaves API. Caso a
 chave apareça em imagem compartilhada, gere uma nova no AI Studio e reconfigure.
+
+## 🏪 Horizonte Commerce 4.4 — Servidor MCP central
+
+Agora é possível criar cafeterias originais com **B**, aproximar-se e
+abrir o atendimento com **G**. O painel permite comprar café, pão de queijo
+e suco com moedas fictícias, simular um pedido da Nina e repor o estoque.
+Lojas, vendas e carteira ficam salvas entre sessões do jogo.
+
+O serviço usa um único servidor **Model Context Protocol** no endereço
+`http://127.0.0.1:4180/mcp`, com seis ferramentas verdadeiras para
+listar estabelecimentos, consultar estoque, criar cafeteria, registrar
+pedido, repor estoque e consultar caixa.
+
+Inicie pelo arquivo `INICIAR-3D.bat`, que liga automaticamente a ponte
+Gemini e o servidor Commerce. O serviço não fica acessível na internet.
+
+> O pedido da Nina é uma demonstração acionada pelo jogador; o Gemini Live
+> não gerencia o caixa diretamente nesta versão. Não existem transações reais.
+
+Veja [arquitetura, riscos e plano futuro do Horizonte Commerce](docs/COMMERCE-MCP.md).

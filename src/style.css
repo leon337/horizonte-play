@@ -167,3 +167,82 @@ kbd{font-family:inherit;font-size:9px;font-weight:900;border:1px solid #bdc9dd;b
   .npc-live-controls{padding:8px 10px}
   #npc-live-connect,#npc-live-mic{font-size:9px}
 }
+
+/* Horizonte Commerce — lojas criadas via MCP central (100% economia fictícia). */
+.commerce-hud{position:absolute;top:357px;right:3.4%;width:258px;padding:14px;
+  pointer-events:auto;border:2px solid #ffffff;border-radius:17px;
+  box-shadow:0 7px 0 #3f506e2d,0 15px 36px #304d7038;
+  background:#fffaf0f5;color:#364960}
+.commerce-title{display:flex;align-items:center;justify-content:space-between;
+  gap:6px;font-size:12px;font-weight:950;letter-spacing:.02em}
+.commerce-title small{font-size:10px;color:#996c50;background:#fbe6d2;
+  padding:5px 7px;border-radius:6px;white-space:nowrap}
+.commerce-connection{margin:9px 0;font-size:10px;font-weight:800;
+  color:#387d76;background:#e1f4f1;padding:8px;border-radius:8px}
+.commerce-wallet{margin:7px 0 10px;font-size:11px;color:#655c4c}
+.commerce-wallet strong{color:#9b714a}
+.commerce-name-label{display:block;margin-bottom:5px;color:#697a8b;
+  font-size:9px;font-weight:900;letter-spacing:.05em}
+#commerce-name{display:block;width:100%;box-sizing:border-box;border-radius:8px;
+  border:1px solid #d8c9b8;background:#fff;color:#4c4e60;
+  padding:8px;font:750 11px system-ui}
+#commerce-create,#commerce-interact{display:flex;width:100%;align-items:center;
+  justify-content:space-between;padding:9px 10px;margin-top:7px;cursor:pointer;
+  border:0;border-radius:9px;color:white;font-size:11px;font-weight:900}
+#commerce-create{background:#e08160}
+#commerce-interact{background:#5969ca}
+#commerce-create:disabled,#commerce-interact:disabled{opacity:.5;cursor:not-allowed}
+#commerce-create kbd,#commerce-interact kbd{background:#ffffff22;color:white;border-color:#ffffff70}
+.commerce-status-row{display:flex;align-items:center;justify-content:space-between;
+  font-size:10px;color:#7f8b99;margin-top:10px;gap:7px;font-weight:700}
+#commerce-refresh{border:0;border-radius:7px;background:#eaf0f5;
+  padding:4px 9px;color:#57677c;cursor:pointer;font-weight:900}
+.commerce-modal{position:absolute;z-index:6;top:50%;left:50%;
+  transform:translate(-50%,-50%);width:min(425px,93vw);border-radius:19px;
+  overflow:hidden;color:#34425c;background:#fffcf6;
+  border:3px solid white;box-shadow:0 22px 90px #1827479e}
+.commerce-modal-header{display:flex;align-items:center;gap:12px;
+  background:#fff0dc;padding:16px;border-bottom:1px solid #e6d9c5}
+.commerce-modal-icon{display:grid;place-items:center;width:49px;height:49px;
+  flex-shrink:0;background:#ffddb3;border-radius:13px;font-size:25px}
+.commerce-modal-header h2{margin:0;color:#674663;font-size:19px;font-weight:950;
+  line-height:1.1;overflow-wrap:anywhere}
+.commerce-modal-header p{margin:4px 0 0;color:#947984;font-size:11px}
+#commerce-close{margin-left:auto;align-self:flex-start;border:0;border-radius:8px;
+  background:#f4dfd6;color:#805865;width:31px;height:31px;cursor:pointer}
+.commerce-modal-body{padding:18px}
+.commerce-fake-money{font-size:10px;font-weight:900;color:#7c6548;
+  background:#fff2d4;border-radius:8px;padding:11px;margin-bottom:14px}
+.commerce-modal-body>label{display:block;margin:12px 0 6px;font-size:11px;font-weight:900;color:#66647a}
+#commerce-product,#commerce-quantity{width:100%;box-sizing:border-box;
+  border-radius:9px;border:1px solid #c5cbda;
+  background:#fff;color:#3c4b63;padding:11px;font:750 12px system-ui}
+.commerce-buy{display:block;width:100%;border:0;border-radius:10px;
+  background:#5e69e3;color:white;cursor:pointer;font-size:12px;
+  font-weight:900;padding:12px;margin-top:15px}
+.commerce-other-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.commerce-other-actions button{padding:10px 7px;border:1px solid #c9d9e5;
+  background:#edf4ff;color:#43597a;border-radius:10px;font-size:10px;
+  cursor:pointer;font-weight:850}
+.commerce-modal button:disabled{opacity:.55;cursor:wait}
+#commerce-feedback{font-size:11px;line-height:1.45;font-weight:750;
+  background:#eaf5ed;color:#426859;padding:11px;border-radius:9px;min-height:32px}
+.commerce-modal-body>small{font-size:9px;color:#8e8e98}
+.commerce-hud button:focus-visible,.commerce-modal button:focus-visible,
+.commerce-hud input:focus-visible,.commerce-modal input:focus-visible,
+.commerce-modal select:focus-visible{outline:3px solid #7968de;outline-offset:2px}
+@media(max-width:900px){
+  .commerce-hud{right:2%;top:356px;width:210px;padding:10px}
+}
+@media(max-width:650px){
+  .commerce-hud{top:333px;right:3%;width:166px;padding:8px;border-radius:11px}
+  .commerce-title{font-size:10px}.commerce-connection{font-size:8px;padding:5px}
+  #commerce-name{font-size:9px;padding:6px}
+  #commerce-create,#commerce-interact{font-size:9px;padding:7px}
+  .commerce-wallet,.commerce-name-label,.commerce-status-row{font-size:8px}
+  .commerce-modal{max-height:85vh;overflow:auto}
+  .commerce-modal-body{padding:12px}
+  .commerce-modal-header h2{font-size:16px}
+  .commerce-other-actions button{font-size:9px}
+}
+[hidden]{display:none!important}
