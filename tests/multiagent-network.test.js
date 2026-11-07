@@ -52,7 +52,7 @@ test('Nina e Alex trocam mensagens bidirecionais e concluem missÃ£o em colaboraÃ
   assert.deepEqual(sequence.slice(-4), [
     'demo_accept', 'arrived', 'demo_ready', 'thanks'
   ]);
-  assert.ok(sim.events.every(m => /^task-\d+$/.test(m.taskId)));
+  assert.ok(sim.events.every(m => /^task-[a-z0-9-]+$/.test(m.taskId)));
   assert.ok(sim.events.every(m => m.text.length <= 180));
   assert.equal(new Set(sim.events.map(m => m.taskId)).size, 1);
   assert.ok(sim.events.some(m => m.from === 'nina' && m.to === 'alex:cafe-1'));

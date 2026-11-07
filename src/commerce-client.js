@@ -33,10 +33,23 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
   let online = false, working = false, modalOpen = false;
   let activeShop = null, lastHud = -1;
   let pendingQuote = null, sampledNina = null, lastNinaSample = -1;
-  let lastNetworkTime = null;
+  let lastNetworkTime = null, memorySummary = null;
+  async function refreshMemories(shopId = '') {
+    try {
+      memorySummary = await call('/api/agents/memory' +
+        (shopId ? '?shopId=' + encodeURIComponent(shopId) : ''));
+    } catch { memorySummary = null; }
+  }
   const network = createMultiagentNetwork({
     readInventory: shopId => call('/api/shops/' +
       encodeURIComponent(shopId) + '/agents/stock'),
+    generateDialogue: request => call('/api/agents/dialogue',
+      { data: request }),
+    persistTask: async task => {
+      const result = await call('/api/agents/memory/completed',{data:task});
+      await refreshMemories(task.shopId);
+      return result;
+    },
     assignNina: shop => npc.beginCollaboration(shop),
     releaseNina: shopId => npc.endCollaboration(shopId),
     onAlexEvent: (shopId, action) => display.attendantEvent(shopId, action),
@@ -71,6 +84,7 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
     try {
       updateState(await call('/api/state'));
       online = true;
+      await refreshMemories(state.shops[0]?.id || '');
       text('commerce-connection', 'MCP conectado · ' + state.shops.length + ' loja(s)');
       render();
       return true;
@@ -95,6 +109,18 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
       ? '🤖 Alex: ' + alex.activity
       : '🤖 Alex atende nas cafeterias');
     const net = network.snapshot();
+    text('network-ai-status', !net.geminiEnabled
+      ? 'IA desligada · 6 chamadas/10 min · 20/24 h'
+      : 'Gemini: ' + ({
+          pronto:'pronto',gerando:'gerando fala',
+          gemini:'fala gerada',fallback:'modo local após falha'
+        }[net.aiStatus] || net.aiStatus) + ' · cotas aplicadas');
+    text('network-memory-status', memorySummary
+      ? '💾 Memórias locais · Nina: ' + memorySummary.nina +
+        ' · Alex: ' + memorySummary.alex +
+        (net.memoryStatus === 'saving' ? ' · salvando...' :
+         net.memoryStatus === 'error' ? ' · erro ao salvar' : '')
+      : '💾 Memória local: indisponível');
     text('network-status', !net.enabled ? 'Rede desligada pelo jogador' :
       net.active ? 'Missão ' + net.active.id + ' · ' +
         ({ requesting:'Consultando MCP', travelling:'Nina indo à cafeteria',
@@ -350,6 +376,10 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
   $('commerce-refresh').addEventListener('click', () => { void synchronize(); });
   $('network-enabled').addEventListener('change', () => {
     network.setEnabled($('network-enabled').checked);
+    render();
+  });
+  $('network-gemini').addEventListener('change', () => {
+    network.setGeminiEnabled($('network-gemini').checked);
     render();
   });
   $('commerce-close').addEventListener('click', close);

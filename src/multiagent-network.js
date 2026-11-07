@@ -17,12 +17,14 @@ const safeProducts = products => Array.isArray(products)
 
 export function createMultiagentNetwork({
   readInventory, assignNina = () => false, releaseNina = () => {},
-  onAlexEvent = () => {}, onMessage = () => {}
+  onAlexEvent = () => {}, onMessage = () => {},
+  generateDialogue = null, persistTask = null
 } = {}) {
   if (typeof readInventory !== 'function') throw new TypeError('Ferramenta obrigatória.');
   const agents = new Map();
   const log = [];
-  let enabled = true, clock = 0, seq = 0, current = null, completed = 0;
+  let enabled = true, geminiEnabled = false, aiStatus = 'local',
+    memoryStatus = 'idle', clock = 0, seq = 0, current = null, completed = 0;
   let lastRun = -120, lastAttempt = -8, recentShop = null;
   function register(id, handler) {
     if (!/^(nina|alex:cafe-\d+)$/.test(id) || typeof handler !== 'function')
@@ -51,12 +53,49 @@ export function createMultiagentNetwork({
     agents.get(to)(msg, data);
     return true;
   }
+  // Falas geradas são apenas texto: o evento/tarefa continua determinístico.
+  function speak(from, to, kind, data, fallback) {
+    if (!geminiEnabled || !generateDialogue ||
+        !['inventory_request','inventory_report','demo_request',
+          'demo_accept'].includes(kind))
+      return send(from, to, kind, data, fallback);
+    const taskId = current?.id;
+    const context = JSON.stringify({
+      cafeteria:current?.shopName, produto:current?.item?.label || null,
+      finalidade:'demonstração fictícia sem compra'
+    });
+    aiStatus = 'gerando';
+    Promise.resolve().then(() => generateDialogue({
+      agentId:from,recipient:to,kind,taskId,fallback,context
+    })).then(response => {
+      if (!current || current.id !== taskId || !enabled) return;
+      const text = geminiEnabled && typeof response?.text === 'string' &&
+        response.text.trim() && response.text.length <= 180
+        ? response.text : fallback;
+      aiStatus = text === fallback ? 'fallback' : 'gemini';
+      send(from,to,kind,data,text);
+    }).catch(() => {
+      if (!current || current.id !== taskId || !enabled) return;
+      aiStatus = 'fallback';
+      send(from,to,kind,data,fallback);
+    });
+    return true;
+  }
   function finish(status, reason = '') {
     if (!current) return;
     const task = current;
     task.phase = status;
     task.reason = reason;
-    if (status === 'completed') completed++;
+    if (status === 'completed') {
+      completed++;
+      if (persistTask && task.item) {
+        memoryStatus = 'saving';
+        Promise.resolve().then(() => persistTask({
+          taskId:task.id,shopId:task.shopId,product:task.item.sku
+        })).then(() => { memoryStatus='saved'; })
+          .catch(() => { memoryStatus='error'; });
+      }
+    }
     releaseNina(task.shopId);
     lastRun = clock;
     current = null;
@@ -74,7 +113,7 @@ export function createMultiagentNetwork({
         products.find(p => p.stock > 0);
       if (!item) return fail('Sem produtos disponíveis para demonstração.');
       current.item = item;
-      send('nina', current.alex, 'demo_request', { sku: item.sku },
+      speak('nina', current.alex, 'demo_request', { sku: item.sku },
         'Alex, vamos demonstrar o preparo de ' + item.label + '?');
     } else if (msg.kind === 'demo_accept') {
       current.phase = 'travelling';
@@ -94,14 +133,14 @@ export function createMultiagentNetwork({
         Promise.resolve().then(() => readInventory(shopId))
           .then(inventory => {
             if (!current || current.id !== taskId || !enabled) return;
-            send(id, 'nina', 'inventory_report', {
+            speak(id, 'nina', 'inventory_report', {
               products: safeProducts(inventory?.products)
             }, 'Estoque consultado via MCP; vou enviar o catálogo disponível.');
           }).catch(() => {
             if (current?.id === taskId) fail('Consulta MCP indisponível.');
           });
       } else if (msg.kind === 'demo_request') {
-        send(id, 'nina', 'demo_accept', {},
+        speak(id, 'nina', 'demo_accept', {},
           'Combinado, Nina. Espero você para preparar o pedido demonstrativo.');
         onAlexEvent(shopId, 'talk');
       } else if (msg.kind === 'arrived') {
@@ -124,12 +163,14 @@ export function createMultiagentNetwork({
     if (!target || !Number.isFinite(target.x) || !Number.isFinite(target.z))
       return false;
     const alex = registerShop(shop.id);
-    current = { id: 'task-' + (++seq), shopId: shop.id,
+    current = { id: 'task-' + Date.now().toString(36) + '-' +
+      Math.random().toString(36).slice(2,8) + '-' + (++seq),
+      shopId: shop.id,
       shopName: String(shop.name).slice(0, 40), alex,
       target, phase: 'requesting', item: null, prepRemaining: 0,
       started: clock, messages: 0 };
     recentShop = shop.id;
-    send('nina', alex, 'inventory_request', {},
+    speak('nina', alex, 'inventory_request', {},
       'Alex, preciso conferir o estoque para nossa tarefa em equipe.');
     return true;
   }
@@ -166,6 +207,11 @@ export function createMultiagentNetwork({
     }
     return snapshot();
   }
+  function setGeminiEnabled(next) {
+    geminiEnabled = Boolean(next);
+    aiStatus = geminiEnabled ? 'pronto' : 'local';
+    return geminiEnabled;
+  }
   function cancel(reason = 'Missão interrompida.') {
     if (current) fail(reason);
   }
@@ -176,7 +222,8 @@ export function createMultiagentNetwork({
   }
   function snapshot() {
     return {
-      enabled, completed, active: current ? {
+      enabled, geminiEnabled, aiStatus, memoryStatus, completed,
+      active: current ? {
         id: current.id, shopId: current.shopId, phase: current.phase,
         product: current.item?.label || null, target: { ...current.target }
       } : null,
@@ -184,5 +231,6 @@ export function createMultiagentNetwork({
       agentIds: [...agents.keys()]
     };
   }
-  return { register, send, start, update, cancel, setEnabled, snapshot };
+  return { register, send, start, update, cancel,
+    setEnabled, setGeminiEnabled, snapshot };
 }
