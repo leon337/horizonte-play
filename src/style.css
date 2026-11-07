@@ -197,6 +197,9 @@ kbd{font-family:inherit;font-size:9px;font-weight:900;border:1px solid #bdc9dd;b
   font-size:10px;color:#7f8b99;margin-top:10px;gap:7px;font-weight:700}
 #commerce-refresh{border:0;border-radius:7px;background:#eaf0f5;
   padding:4px 9px;color:#57677c;cursor:pointer;font-weight:900}
+.commerce-alex-status{font-size:10px;line-height:1.4;font-weight:750;
+  color:#3b6764;background:#e1f5ed;border-radius:8px;
+  padding:7px 8px;margin-top:8px;overflow-wrap:anywhere}
 .commerce-modal{position:absolute;z-index:6;top:50%;left:50%;
   transform:translate(-50%,-50%);width:min(425px,93vw);border-radius:19px;
   overflow:hidden;color:#34425c;background:#fffcf6;

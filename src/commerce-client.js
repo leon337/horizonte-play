@@ -31,7 +31,7 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
   let state = { shops: [], wallet: 180, maxShops: 8, catalog: {} };
   let online = false, working = false, modalOpen = false;
   let activeShop = null, lastHud = -1;
-  let pendingQuote = null;
+  let pendingQuote = null, sampledNina = null, lastNinaSample = -1;
 
   function updateState(data) {
     if (!data || !Array.isArray(data.shops)) return;
@@ -67,6 +67,10 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
     interact.disabled = working || !nearby || !online || !canAct();
     interact.title = nearby ? 'Abrir balcão da cafeteria (G)' : 'Aproxime-se de uma cafeteria';
     text('commerce-nearby', nearby ? 'Perto: ' + nearby.name : 'Nenhuma loja próxima');
+    const alex = nearby && display.attendantSnapshot(nearby.id);
+    text('commerce-alex-status', alex
+      ? '🤖 Alex: ' + alex.activity
+      : '🤖 Alex atende nas cafeterias');
     $('commerce-create').disabled = !online || working || !canAct() ||
       state.shops.length >= state.maxShops;
     $('commerce-refresh').disabled = working;
@@ -135,6 +139,7 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
       return false;
     }
     activeShop = state.shops.find(item => item.id === shop.id) || shop;
+    display.attendantEvent(activeShop.id, 'open');
     modalOpen = true;
     $('commerce-modal').hidden = false;
     text('commerce-feedback', 'Bem-vindo! Escolha um produto ou veja o caixa.');
@@ -147,6 +152,7 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
   }
   function close() {
     if (!modalOpen) return;
+    if (activeShop) display.attendantEvent(activeShop.id, 'bye');
     modalOpen = false;
     pendingQuote = null;
     activeShop = null;
@@ -174,6 +180,8 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
       if (activeShop) renderProducts(activeShop);
       pendingQuote = null;
       $('commerce-attendant-confirm').hidden = true;
+      display.attendantEvent(shopId, kind === 'restock' ? 'restock' :
+        kind === 'nina' ? 'nina' : 'order');
       const message = kind === 'restock' ? '📦 Estoque reposto (' + result.stock + ' unidades)'
         : (kind === 'nina' ? '🤖 Nina fez um pedido fictício: ' :
           '☕ Pedido registrado: ') + result.receipt.product +
@@ -238,6 +246,7 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
         } });
       if (!modalOpen || activeShop?.id !== shopId) return;
       say('Alex', result.message);
+      display.attendantEvent(shopId, 'talk');
       pendingQuote = result.proposal;
       $('commerce-attendant-confirm').hidden = !pendingQuote;
       text('commerce-attendant-mode', result.mode === 'gemini'
@@ -265,6 +274,7 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
       await synchronize();
       if (modalOpen && activeShop?.id === shopId) {
         renderProducts(activeShop);
+        display.attendantEvent(shopId, 'order');
         say('Alex', 'Pedido ' + result.receipt.id + ' registrado: ' +
           result.receipt.quantity + ' × ' + result.receipt.product + ' · ' +
           result.receipt.amount + ' moedas virtuais.');
@@ -285,7 +295,11 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
     return false;
   }
   function update(time, visible) {
-    display.update(time, player);
+    if (time - lastNinaSample > 0.25) {
+      sampledNina = npc.getSnapshot(player);
+      lastNinaSample = time;
+    }
+    display.update(time, player, sampledNina, modalOpen ? activeShop?.id : null);
     $('commerce-hud').hidden = !visible;
     if (!visible && modalOpen) close();
     if (time - lastHud > 0.34) {
@@ -322,6 +336,7 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
     restrictCamera: (target, desired) => display.restrictCamera(target, desired),
     isModalOpen: () => modalOpen,
     getSnapshot: () => ({ online, shops: state.shops.length, wallet: state.wallet,
-      nearby: display.nearby(player)?.id || null })
+      nearby: display.nearby(player)?.id || null,
+      attendants: display.attendantSnapshots() })
   };
 }
