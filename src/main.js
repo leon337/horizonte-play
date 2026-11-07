@@ -382,6 +382,7 @@ function openNpcChat() {
     notify('Chegue perto de Nina para conversar.');
     return;
   }
+  commerce.cancelMultiagent();
   dialogueOpen = true;
   pressed.clear();
   $('npc-chat-history').replaceChildren();

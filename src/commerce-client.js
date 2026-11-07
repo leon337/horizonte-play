@@ -1,5 +1,6 @@
 import { createCommerceWorld } from './commerce-world.js';
 import { findCafeSpot } from './commerce-placement.js';
+import { createMultiagentNetwork } from './multiagent-network.js';
 
 const API = 'http://127.0.0.1:4180';
 async function call(path, options = {}) {
@@ -32,6 +33,28 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
   let online = false, working = false, modalOpen = false;
   let activeShop = null, lastHud = -1;
   let pendingQuote = null, sampledNina = null, lastNinaSample = -1;
+  let lastNetworkTime = null;
+  const network = createMultiagentNetwork({
+    readInventory: shopId => call('/api/shops/' +
+      encodeURIComponent(shopId) + '/agents/stock'),
+    assignNina: shop => npc.beginCollaboration(shop),
+    releaseNina: shopId => npc.endCollaboration(shopId),
+    onAlexEvent: (shopId, action) => display.attendantEvent(shopId, action),
+    onMessage: message => {
+      const history = $('network-messages');
+      const item = document.createElement('div');
+      item.className = 'network-message';
+      const who = document.createElement('strong');
+      who.textContent = message.from === 'nina' ? 'Nina → Alex: ' :
+        message.from.startsWith('alex:') ? 'Alex → Nina: ' : 'Rede: ';
+      const body = document.createElement('span');
+      body.textContent = message.text;
+      item.append(who, body);
+      history.appendChild(item);
+      while (history.childElementCount > 9) history.firstElementChild.remove();
+      history.scrollTop = history.scrollHeight;
+    }
+  });
 
   function updateState(data) {
     if (!data || !Array.isArray(data.shops)) return;
@@ -71,6 +94,14 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
     text('commerce-alex-status', alex
       ? '🤖 Alex: ' + alex.activity
       : '🤖 Alex atende nas cafeterias');
+    const net = network.snapshot();
+    text('network-status', !net.enabled ? 'Rede desligada pelo jogador' :
+      net.active ? 'Missão ' + net.active.id + ' · ' +
+        ({ requesting:'Consultando MCP', travelling:'Nina indo à cafeteria',
+          arriving:'Iniciando serviço', preparing:'Alex preparando demonstração',
+          acknowledging:'Concluindo tarefa' }[net.active.phase] || net.active.phase) :
+        net.completed > 0 ? 'Missões concluídas: ' + net.completed :
+          'Nina e Alex conectados · aguardando tarefa');
     $('commerce-create').disabled = !online || working || !canAct() ||
       state.shops.length >= state.maxShops;
     $('commerce-refresh').disabled = working;
@@ -299,6 +330,13 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
       sampledNina = npc.getSnapshot(player);
       lastNinaSample = time;
     }
+    const networkDt = lastNetworkTime === null ? 0 :
+      Math.max(0, Math.min(0.15, time - lastNetworkTime));
+    lastNetworkTime = time;
+    network.update(networkDt, {
+      shops: online ? state.shops : [], nina: sampledNina,
+      active: visible && online && canAct() && !modalOpen
+    });
     display.update(time, player, sampledNina, modalOpen ? activeShop?.id : null);
     $('commerce-hud').hidden = !visible;
     if (!visible && modalOpen) close();
@@ -310,6 +348,10 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
   $('commerce-create').addEventListener('click', () => { void createCafe(); });
   $('commerce-interact').addEventListener('click', open);
   $('commerce-refresh').addEventListener('click', () => { void synchronize(); });
+  $('network-enabled').addEventListener('change', () => {
+    network.setEnabled($('network-enabled').checked);
+    render();
+  });
   $('commerce-close').addEventListener('click', close);
   $('commerce-tab-chat').addEventListener('click', () => setCommerceTab('chat'));
   $('commerce-tab-quick').addEventListener('click', () => setCommerceTab('quick'));
@@ -333,10 +375,12 @@ export function createCommerceExperience({ scene, world, builder, npc, player,
   void synchronize();
   return {
     update, close, onKey, createCafe, open, synchronize,
+    cancelMultiagent: () => network.cancel('Interrompido para conversar com o jogador.'),
     restrictCamera: (target, desired) => display.restrictCamera(target, desired),
     isModalOpen: () => modalOpen,
     getSnapshot: () => ({ online, shops: state.shops.length, wallet: state.wallet,
       nearby: display.nearby(player)?.id || null,
-      attendants: display.attendantSnapshots() })
+      attendants: display.attendantSnapshots(),
+      network: network.snapshot() })
   };
 }

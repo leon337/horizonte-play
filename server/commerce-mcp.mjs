@@ -218,6 +218,15 @@ export function createCommerceHandler(store, {
         return sendJson(res, action === 'chat' ? 200 : 201, result, allowed);
       }
 
+      // Gateway multiagente somente leitura, executado por ferramenta MCP real.
+      // Não expõe criação, compras ou reposição para agentes autônomos.
+      const networkRoute = url.pathname.match(
+        /^\/api\/shops\/([a-z0-9-]+)\/agents\/stock$/);
+      if (networkRoute && req.method === 'GET') {
+        const result = await invokeCommerceTool(store, 'consultar_estoque',
+          { estabelecimento_id: networkRoute[1] });
+        return sendJson(res, 200, result, allowed);
+      }
       const match = url.pathname.match(/^\/api\/shops\/([a-z0-9-]+)\/(inventory|orders|restock|cash)$/);
       if (match) {
         const [, id, resource] = match;

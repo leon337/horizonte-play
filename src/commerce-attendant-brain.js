@@ -10,6 +10,7 @@ const SAY = Object.freeze({
   open: 'Olá! Posso ajudar?',
   talk: 'Pode falar!',
   order: 'Pedido pronto! ☕',
+  demo: 'Demonstração pronta! ☕',
   restock: 'Estoque organizado!',
   nina: 'Oi, Nina! ☕',
   bye: 'Até logo!'
