@@ -102,6 +102,17 @@
       <div id="commerce-alex-status" class="commerce-alex-status">
         🤖 Alex atende nas cafeterias
       </div>
+      <section class="network-panel" aria-label="Rede multiagente do mundo">
+        <div class="network-heading">
+          <strong>🔗 REDE MULTIAGENTE</strong>
+          <label><input id="network-enabled" type="checkbox" checked>
+            Ativa</label>
+        </div>
+        <small id="network-status" role="status">Nina e Alex conectados · aguardando missão</small>
+        <div id="network-messages" class="network-messages" role="log"
+          aria-label="Mensagens entre agentes" aria-live="polite"></div>
+        <small class="network-disclaimer">Tarefas demonstrativas · só consulta MCP · sem compras automáticas</small>
+      </section>
     </section>
     <div class="controls-strip">
       <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVER</span>
@@ -188,7 +199,7 @@
     <button id="reset-btn" type="button" hidden>↺ Renascer <kbd>R</kbd></button>
   </div>
   <div id="toast" role="status" class="toast" hidden></div>
-  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> COMMERCE 4.7</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
+  <footer class="footer"><span>✦ HORIZONTE PLAY <b>·</b> COMMERCE 4.8</span><span>FEITO PARA CRIAR · THREE.JS</span></footer>
   <div id="error" hidden role="alert">Este navegador não conseguiu iniciar o mundo 3D. Verifique o WebGL e a aceleração gráfica.</div>
 </div>
 <script type="module" src="/src/main.js"></script>

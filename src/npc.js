@@ -32,6 +32,7 @@ export function createNPC(scene, baseColliders, dynamicColliders) {
   let elapsed = 0;
   let blockedFor = 0;
   let currentPlayer = { x: 0, z: 6 };
+  let collaboration = null;
   const speed = 2.45;
 
   function obstacles() {
@@ -89,7 +90,20 @@ export function createNPC(scene, baseColliders, dynamicColliders) {
     elapsed = time;
     currentPlayer = { x: player.x, z: player.z };
     const nearPlayer = Math.hypot(player.x - position.x, player.z - position.z) <= 3.9;
-    if (!stopped && !mind.conversationOpen) {
+    if (!stopped && !mind.conversationOpen && collaboration) {
+      planCooldown -= dt;
+      const arrived = Math.hypot(collaboration.target.x - position.x,
+        collaboration.target.z - position.z) < 1.4;
+      if (arrived) {
+        walking = false;
+        path = [];
+      } else {
+        if (planCooldown <= 0 || planGoal !== 'collaborate') {
+          replan(collaboration.target, 'collaborate');
+        }
+        walk(dt);
+      }
+    } else if (!stopped && !mind.conversationOpen) {
       const oldGoal = mind.goal;
       const destination = getTarget(mind, player);
       const dist = Math.hypot(destination.x - position.x, destination.z - position.z);
@@ -132,7 +146,7 @@ export function createNPC(scene, baseColliders, dynamicColliders) {
     character.update({
       x: position.x, y: heightAt(position.x, position.z), z: position.z,
       heading, walking, time,
-      action: mind.conversationOpen ? 'talk' :
+      action: mind.conversationOpen || collaboration && !walking ? 'talk' :
         mind.phase === 'acting' ? mind.goal : 'idle',
       nearPlayer
     });
@@ -143,6 +157,7 @@ export function createNPC(scene, baseColliders, dynamicColliders) {
   }
   function startConversation(player) {
     if (!closeTo(player)) return false;
+    endCollaboration();
     mind.conversationOpen = true;
     walking = false;
     return true;
@@ -160,12 +175,49 @@ export function createNPC(scene, baseColliders, dynamicColliders) {
     planCooldown = 0;
     return message;
   }
+  function beginCollaboration(shop) {
+    if (mind.follow || mind.conversationOpen || collaboration) return null;
+    if (!Number.isFinite(shop?.x) || !Number.isFinite(shop?.z)) return null;
+    const candidates = [
+      { x: shop.x, z: shop.z - 5.15 },
+      { x: shop.x + 5.15, z: shop.z },
+      { x: shop.x - 5.15, z: shop.z },
+      { x: shop.x, z: shop.z + 5.15 }
+    ];
+    const blocks = obstacles();
+    for (const candidate of candidates) {
+      if (!npcPassable(candidate.x, candidate.z, blocks)) continue;
+      const route = findNpcPath(position, candidate, blocks);
+      if (!route.length) continue;
+      collaboration = { shopId: shop.id, target: candidate };
+      path = route;
+      pathEnd = route[route.length - 1] || null;
+      planTarget = { ...candidate };
+      planGoal = 'collaborate';
+      planCooldown = 4;
+      walking = false;
+      return { ...candidate };
+    }
+    return null;
+  }
+  function endCollaboration(shopId = null) {
+    if (!collaboration || shopId && collaboration.shopId !== shopId) return false;
+    collaboration = null;
+    path = [];
+    pathEnd = null;
+    planGoal = null;
+    planCooldown = 0;
+    return true;
+  }
   function getSnapshot(player = currentPlayer) {
     return {
       name: NPC_NAME,
       x: position.x, z: position.z,
-      activity: NPC_GOALS[mind.goal],
-      phase: mind.phase,
+      activity: collaboration ? 'Cooperando com Alex' : NPC_GOALS[mind.goal],
+      phase: collaboration ? 'collaborating' : mind.phase,
+      collaboration: collaboration ? { shopId: collaboration.shopId,
+        target: { ...collaboration.target } } : null,
+      conversationOpen: mind.conversationOpen,
       time: clockLabel(mind.clockMinutes),
       needs: { ...mind.needs },
       follow: mind.follow,
@@ -210,6 +262,6 @@ export function createNPC(scene, baseColliders, dynamicColliders) {
   });
   return {
     collider, update, closeTo, startConversation, endConversation,
-    say, getSnapshot, onWorldChanged
+    say, getSnapshot, onWorldChanged, beginCollaboration, endCollaboration
   };
 }
